@@ -22,6 +22,11 @@ End Type
 
 
 Dim Shared As chip8 CPU ' main cpu
+Dim Shared As fb.image Ptr screenbuff ' buffer for screen
+Dim Shared As Integer sfx = 10, sfy = 15' scale factor for display
+Dim Shared As Single start
+Dim Shared As Integer VX, VY, VI, KK
+Dim Shared opctemp As String
 #Include Once "inc/c8 instruction set.bi" ' these must go here because depend on cpu type
 #Include Once "inc/decoder.bi" ' same
 
@@ -44,9 +49,7 @@ Dim Shared As UByte font(0 To 79) => _ ' Chip 8 font set
 &hF0, &h80, &hF0, &h80, &hF0, _ ' E
 &hF0, &h80, &hF0, &h80, &h80}   ' F
 
-Dim Shared As fb.image Ptr screenbuff ' buffer for screen
-Dim Shared As Integer sfx = 10, sfy = 15' scale factor for display
-Dim Shared As Single start
+
 
 Declare Sub initcpu ' initialize CPU
 Declare Sub loadprog ' load ROM to memory
@@ -163,9 +166,10 @@ End Sub
 'PROGRAM START
 ScreenRes 640,480,32
 initcpu
-loadprog
+'loadprog
 'main loop
-start = timer
+start = Timer
+
 Do
 	cpu.opcount+=1
 	

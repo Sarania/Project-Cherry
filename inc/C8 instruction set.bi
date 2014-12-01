@@ -47,17 +47,20 @@ Sub INS_RET '00EE
 End Sub
 
 Sub INS_JMP '1NNN
-	Dim temp As Integer
-	temp = CInt(Right(Str(cpu.opcode),3))
-	cpu.pc = temp
+	cpu.pc = cpu.opcode And &h0FFF
 End Sub
 
 Sub INS_CALL '2NNN
-	
+	cpu.sp+=1
+	cpu.stack(cpu.sp)=cpu.pc
+   cpu.pc = cpu.opcode And &h0FFF
 End Sub
 
 Sub INS_SKIPEQUAL '3XKK
-	
+VI = cpu.opcode and &H0F00
+VI = vi Shr 8
+KK = cpu.opcode And &h00FF
+If cpu.v(vi) = kk Then cpu.pc+=2
 End Sub
 
 Sub INS_SKIPNOTEQUAL '4XKK

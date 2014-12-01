@@ -2,7 +2,6 @@
 Declare Sub decode(ByVal opc As UShort)
 
 Sub decode(ByVal opc As UShort)
-	Dim opctemp As String
 	opctemp = UCase(Hex(opc))
 
 	If opctemp = "00E0" Then
