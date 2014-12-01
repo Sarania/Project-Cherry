@@ -177,6 +177,7 @@ Do
 	cpu.opcodePTR = @cpu.memory(cpu.pc)
 	cpu.opcode = (LoByte(*cpu.opcodePTR) Shl 8 ) + HiByte(*cpu.opcodePTR)
 	decode(cpu.opcode)
+	cpu.pc+=2
 	Select Case cpu.instruction
 		Case "CLS"
 			INS_CLS

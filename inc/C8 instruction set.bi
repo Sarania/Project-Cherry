@@ -34,15 +34,22 @@ Declare Sub INS_STOREREG 'FX55
 Declare Sub INS_LOADREG 'FX65
 
 Sub INS_CLS '00E0
-	
+	For y As Integer = 0 To 31
+		For x As Integer = 0 To 63
+			cpu.display(x,y) = 0
+		Next
+		Next
 End Sub
 
 Sub INS_RET '00EE
-	
+	cpu.pc = cpu.stack(cpu.sp)
+	cpu.sp-=1
 End Sub
 
 Sub INS_JMP '1NNN
-	
+	Dim temp As Integer
+	temp = CInt(Right(Str(cpu.opcode),3))
+	cpu.pc = temp
 End Sub
 
 Sub INS_CALL '2NNN
