@@ -57,18 +57,25 @@ Sub INS_CALL '2NNN
 End Sub
 
 Sub INS_SKIPEQUAL '3XKK
-VI = cpu.opcode and &H0F00
-VI = vi Shr 8
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
 KK = cpu.opcode And &h00FF
-If cpu.v(vi) = kk Then cpu.pc+=2
+If cpu.v(vx) = kk Then cpu.pc+=2
 End Sub
 
 Sub INS_SKIPNOTEQUAL '4XKK
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+KK = cpu.opcode And &h00FF
+If cpu.v(vx) <> kk Then cpu.pc+=2
 End Sub
 
 Sub INS_SKIPEQUALREG '5XY0
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+vy = cpu.opcode And &h00F0
+vy = vy Shr 4
+If cpu.v(vx) = cpu.v(vy) Then cpu.pc+=2
 End Sub
 
 Sub INS_LOADKK '6XKK
@@ -76,22 +83,43 @@ Sub INS_LOADKK '6XKK
 End Sub
 
 Sub INS_ADDKK '7XKK
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+KK = cpu.opcode And &h00FF
+cpu.v(vx) = cpu.v(vx)+kk
 End Sub
 
 Sub INS_VXEQVY '8XY0
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+vy = cpu.opcode And &h00F0
+vy = vy Shr 4
+cpu.v(vx) = cpu.v(vy)
 End Sub
 
 Sub INS_VXORVY '8XY1
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+vy = cpu.opcode And &h00F0
+vy = vy Shr 4
+cpu.v(vx) = cpu.v(vx) Or cpu.v(vy)
 End Sub
 
 Sub INS_VXANDVY '8XY2
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+vy = cpu.opcode And &h00F0
+vy = vy Shr 4
+cpu.v(vx) = cpu.v(vx) And cpu.v(vy)
 	
 End Sub
 
 Sub INS_VXXORVY '8XY3
+	Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+vy = cpu.opcode And &h00F0
+vy = vy Shr 4
+cpu.v(vx) = cpu.v(vx) Xor cpu.v(vy)
 	
 End Sub
 

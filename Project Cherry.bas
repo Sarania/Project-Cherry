@@ -25,7 +25,7 @@ Dim Shared As chip8 CPU ' main cpu
 Dim Shared As fb.image Ptr screenbuff ' buffer for screen
 Dim Shared As Integer sfx = 10, sfy = 15' scale factor for display
 Dim Shared As Single start
-Dim Shared As Integer VX, VY, VI, KK
+Dim Shared As Integer VX, VY, KK
 Dim Shared opctemp As String
 #Include Once "inc/c8 instruction set.bi" ' these must go here because depend on cpu type
 #Include Once "inc/decoder.bi" ' same
