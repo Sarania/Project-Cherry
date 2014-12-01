@@ -257,9 +257,9 @@ temp = cpu.v(vx)
 hundreds = Left(Str(temp),1)
 ones = right(Str(temp),1)
 tens = Left(Right(Str(temp),2),1)
-cpu.index = CInt(hundreds)
-cpu.index+1 = CInt(tens)
-cpu.index+2 = CInt(ones)
+cpu.memory(cpu.index) = CInt(hundreds)
+cpu.memory(cpu.index+1) = CInt(tens)
+cpu.memory(cpu.index+2) = CInt(ones)
 End Sub
 
 Sub INS_STOREREG 'FX55
