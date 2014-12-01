@@ -11,7 +11,7 @@ Module=Module Build,fbc -c
 TabOrder=1,2
 [File]
 1=Project Cherry.bas
-2=Project Cherry.rc
+2=res\Project Cherry.rc
 [BreakPoint]
 1=
 [FileInfo]
