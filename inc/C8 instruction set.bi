@@ -232,11 +232,23 @@ cpu.index = cpu.index + cpu.v(vx)
 End Sub
 
 Sub INS_ISPRITE 'FX29
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+cpu.index = (vx*5)
 End Sub
 
 Sub INS_BCDSTORE 'FX33
-	
+Dim As string hundreds, tens, ones
+Dim As integer temp
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+temp = cpu.v(vx)
+hundreds = Left(Str(temp),1)
+ones = right(Str(temp),1)
+tens = Left(Right(Str(temp),2),1)
+cpu.index = CInt(hundreds)
+cpu.index+1 = CInt(tens)
+cpu.index+2 = CInt(ones)
 End Sub
 
 Sub INS_STOREREG 'FX55

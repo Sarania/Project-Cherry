@@ -167,9 +167,10 @@ End Sub
 'PROGRAM START
 ScreenRes 640,480,32
 initcpu
-loadprog
+'loadprog
 'main loop
 start = Timer
+ins_bcdstore
 
 Do
 	cpu.opcount+=1
