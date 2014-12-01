@@ -1,0 +1,19 @@
+[Project]
+Version=3
+Description=Chip 8 Emulator in FB
+Api=fb (FreeBASIC)
+[Make]
+Current=1
+1=Windows GUI,fbc -s gui
+Recompile=2
+Module=Module Build,fbc -c
+[TabOrder]
+TabOrder=1,2
+[File]
+1=Project Cherry.bas
+2=Project Cherry.rc
+[BreakPoint]
+1=
+[FileInfo]
+1=0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2=0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
