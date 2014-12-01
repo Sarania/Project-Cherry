@@ -79,8 +79,12 @@ If cpu.v(vx) = cpu.v(vy) Then cpu.pc+=2
 End Sub
 
 Sub INS_LOADKK '6XKK
-	
+	Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+KK = cpu.opcode And &h00FF
+cpu.v(vx) = KK
 End Sub
+
 
 Sub INS_ADDKK '7XKK
 Vx = cpu.opcode and &H0F00
@@ -132,7 +136,10 @@ Sub INS_SUBTRACT '8XY5
 End Sub
 
 Sub INS_SHIFTR '8XY6
-	
+	Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+If cpu.v(vx) Shl 8 = 1 Then cpu.V(&hF) = 1 Else cpu.V(&hF) = 0
+cpu.v(vx) /= 2
 End Sub
 
 Sub INS_SUBN '8XY7
@@ -152,7 +159,9 @@ Sub INS_LOADINDEX 'ANNN
 End Sub
 
 Sub INS_JUMPREG 'BNNN
-	
+	Dim btemp As UShort
+	btemp = (cpu.opcode And &h0FFF) +cpu.v(0)
+	cpu.pc = btemp
 End Sub
 
 Sub INS_RNDANDKK 'CXKK
@@ -172,7 +181,8 @@ Sub INS_KEYNOTSKIP 'EXA1
 End Sub
 
 Sub INS_VXDELAY 'FX07
-	
+	vx = cpu.opcode And &h0f00
+	cpu.V(vx) = cpu.delayTimer
 End Sub
 
 Sub INS_KEYWAIT 'FX0A
@@ -184,7 +194,8 @@ Sub INS_DELAYSET 'FX15
 End Sub
 
 Sub INS_SOUNDSET 'FX18
-	
+	vx = cpu.opcode And &h0F00
+	cpu.soundTimer = cpu.V(vx)
 End Sub
 
 Sub INS_IPLUSVX 'FX1E
