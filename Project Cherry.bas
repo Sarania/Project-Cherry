@@ -1,8 +1,7 @@
 'Chip 8 Emulator in FreeBASIC
 #Include Once "fbgfx.bi"
 Using FB
-ScreenRes 640,480,32
-
+#Include Once "file.bi"
 
 Type Chip8
 	opcode As ushort
@@ -34,9 +33,9 @@ Type Chip8
 End Type
 
 
-Dim Shared As chip8 CPU
+Dim Shared As chip8 CPU ' main cpu
 
-Dim Shared As UByte font(0 To 79) => _
+Dim Shared As UByte font(0 To 79) => _ ' Chip 8 font set
  {&hF0, &h90, &h90, &h90, &hF0, _ ' 0 
   &h20, &h60, &h20, &h20, &h70, _ ' 1
   &hF0, &h10, &hF0, &h80, &hF0, _ ' 2
@@ -54,14 +53,11 @@ Dim Shared As UByte font(0 To 79) => _
   &hF0, &h80, &hF0, &h80, &hF0, _ ' E
   &hF0, &h80, &hF0, &h80, &h80}   ' F
   
-Dim Shared As fb.image Ptr screenbuf
+Dim Shared As fb.image Ptr screenbuf ' buffer for screen
 
-Declare Sub initcpu
-
-
-
-
-
+Declare Sub initcpu ' initialize CPU
+Declare Sub loadprog ' load ROM to memory
+Declare Sub CAE ' cleanup and exit
 
 
 Sub initcpu
@@ -97,4 +93,66 @@ Sub initcpu
 	Next
 	CPU.delaytimer = 0
 	CPU.soundtimer = 0
+	
+	'Font Load
+	For i As Integer = 0 To 79
+		cpu.memory(i) = font(i)
+	Next
 End Sub
+
+Sub loadprog
+	Dim As String progname, shpname, onechr
+	Dim As UInteger romsize
+	'See if we got a filename from the command line or drag and drop
+	If Command(1) <> "" Then
+		progname = Command(1)
+		GoTo gotname
+	End If
+	Print "Note: ROM must be in EXEPATH, else use drag and drop to load it!)"
+	Input "Program to run (compiled, no header): ", progname 'Get a filename from user
+	progname = ExePath & "\" & progname
+
+	gotname:
+	If progname = "" Or Not FileExists(progname) Then 'Break if no such filename
+		Cls
+		Print "File not found: " & progname
+		Sleep 3000
+		CAE
+	EndIf
+
+	'remove path from filename
+	For z As Integer = 1 To Len(progname) Step 1
+		onechr = Right(Left(progname,z),1)
+		If onechr = "\" Then
+			onechr = ""
+			shpname = ""
+		EndIf
+		shpname = shpname & onechr
+	Next
+
+	WindowTitle "Project Cherry: " & shpname ' set window title
+	Dim As Integer f = FreeFile
+	Open progname For Binary As #f
+	romsize = Lof(1)
+	For i As Integer = 0 To romsize
+		Get #1, i+1, cpu.memory(i+512), 1
+	Next
+	Close #f
+End Sub
+
+Sub CAE
+	Cls
+	Close
+	End
+End Sub
+
+
+'PROGRAM START
+ScreenRes 640,480,32
+initcpu
+loadprog
+
+'main loop
+Do
+	
+Loop While Not MultiKey(SC_ESCAPE)
