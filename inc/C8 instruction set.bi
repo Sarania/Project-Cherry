@@ -115,20 +115,29 @@ cpu.v(vx) = cpu.v(vx) And cpu.v(vy)
 End Sub
 
 Sub INS_VXXORVY '8XY3
-	Vx = cpu.opcode and &H0F00
+Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
 vy = cpu.opcode And &h00F0
 vy = vy Shr 4
 cpu.v(vx) = cpu.v(vx) Xor cpu.v(vy)
-	
 End Sub
 
 Sub INS_ADC '8XY4
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+vy = cpu.opcode And &h00F0
+vy = vy Shr 4
+If cpu.v(vx) + cpu.v(vy) > 255 Then cpu.v(&hF) = 1 Else cpu.v(&hF) = 0
+cpu.v(vx) = cpu.v(vx) + cpu.v(vy)
 End Sub
 
 Sub INS_SUBTRACT '8XY5
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+vy = cpu.opcode And &h00F0
+vy = vy Shr 4
+If cpu.v(vx) > cpu.v(vy) Then cpu.v(&Hf) = 1 Else cpu.v(&hF) = 0
+cpu.v(vx) = cpu.v(vx) - cpu.v(vy)
 End Sub
 
 Sub INS_SHIFTR '8XY6
@@ -136,18 +145,32 @@ Sub INS_SHIFTR '8XY6
 End Sub
 
 Sub INS_SUBN '8XY7
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+vy = cpu.opcode And &h00F0
+vy = vy Shr 4
+If cpu.v(vy) > cpu.v(vx) Then cpu.v(&Hf) = 1 Else cpu.v(&hF) = 0
+cpu.v(vx) = cpu.v(vy)=cpu.v(vx)
 End Sub
 
 Sub INS_SHIFTL '8XYE
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+If Bit(cpu.v(vx),7) Then cpu.v(&hf) = 1 Else cpu.v(&hf) = 0
+cpu.v(vx) = cpu.v(vx) Shl 1
 End Sub
 
 Sub INS_SKIPNOTEQUALREG '9XY0
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+vy = cpu.opcode And &h00F0
+vy = vy Shr 4
+If cpu.v(vx) <> cpu.v(vy) Then cpu.pc+=2
 	
 End Sub
 
 Sub INS_LOADINDEX 'ANNN
+	cpu.index = cpu.opcode And &h0fff
 	
 End Sub
 
@@ -156,7 +179,10 @@ Sub INS_JUMPREG 'BNNN
 End Sub
 
 Sub INS_RNDANDKK 'CXKK
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+KK = cpu.opcode And &h00FF
+cpu.v(vx) = CByte(Rnd*255) And kk
 End Sub
 
 Sub INS_DISPLAY 'DXYN
@@ -164,11 +190,15 @@ Sub INS_DISPLAY 'DXYN
 End Sub
 
 Sub INS_KEYSKIP 'EX9E
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+If cpu.key(vx) = 1 Then cpu.pc+=2
 End Sub
 
 Sub INS_KEYNOTSKIP 'EXA1
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+If cpu.key(vx) = 0 Then cpu.pc+=2
 End Sub
 
 Sub INS_VXDELAY 'FX07
@@ -176,11 +206,19 @@ Sub INS_VXDELAY 'FX07
 End Sub
 
 Sub INS_KEYWAIT 'FX0A
-	
+	Do
+		keycheck
+		For i As Integer = 1 To 15
+			If cpu.key(i) = 1 Then Exit do
+		Next
+		Sleep 15
+	Loop
 End Sub
 
 Sub INS_DELAYSET 'FX15
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+cpu.delaytimer = cpu.v(vx)
 End Sub
 
 Sub INS_SOUNDSET 'FX18
@@ -188,7 +226,9 @@ Sub INS_SOUNDSET 'FX18
 End Sub
 
 Sub INS_IPLUSVX 'FX1E
-	
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+cpu.index = cpu.index + cpu.v(vx)
 End Sub
 
 Sub INS_ISPRITE 'FX29
@@ -200,9 +240,14 @@ Sub INS_BCDSTORE 'FX33
 End Sub
 
 Sub INS_STOREREG 'FX55
-	
+	For I As Integer = 0 To 14
+		cpu.memory(cpu.index + i) = cpu.v(i)
+	Next
 End Sub
 
 Sub INS_LOADREG 'FX65
+	For i As Integer = 0 To 14
+		cpu.v(i) = cpu.memory(cpu.index+i)
+	Next
 	
 End Sub
