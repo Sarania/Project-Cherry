@@ -33,12 +33,30 @@ Type Chip8
 	key(0 To 15) As byte
 End Type
 
+
 Dim Shared As chip8 CPU
+
+Dim Shared As UByte font(0 To 79) => _
+ {&hF0, &h90, &h90, &h90, &hF0, _ ' 0 
+  &h20, &h60, &h20, &h20, &h70, _ ' 1
+  &hF0, &h10, &hF0, &h80, &hF0, _ ' 2
+  &hF0, &h10, &hF0, &h10, &hF0, _ ' 3
+  &h90, &h90, &hF0, &h10, &h10, _ ' 4
+  &hF0, &h80, &hF0, &h10, &hF0, _ ' 5
+  &hF0, &h80, &hF0, &h90, &hF0, _ ' 6
+  &hF0, &h10, &h20, &h40, &h40, _ ' 7
+  &hF0, &h90, &hF0, &h90, &hF0, _ ' 8
+  &hF0, &h90, &hF0, &h10, &hF0, _ ' 9
+  &hF0, &h90, &hF0, &h90, &h90, _ ' A
+  &hE0, &h90, &hE0, &h90, &hE0, _ ' B
+  &hF0, &h80, &h80, &h80, &hF0, _ ' C
+  &hE0, &h90, &h90, &h90, &hE0, _ ' D
+  &hF0, &h80, &hF0, &h80, &hF0, _ ' E
+  &hF0, &h80, &hF0, &h80, &h80}   ' F
+  
 Dim Shared As fb.image Ptr screenbuf
 
 Declare Sub initcpu
-
-
 
 
 
@@ -71,7 +89,7 @@ Sub initcpu
 	CPU.VF = 0
 	CPU.sp = 0
 	CPU.index = 0
-	CPU.PC = 0
+	CPU.PC = &h200
 	For y As Integer = 0 To 31
 		For x As Integer = 0 To 63
 			cpu.display(x,y) = 0
