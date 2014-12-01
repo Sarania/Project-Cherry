@@ -27,6 +27,7 @@ Dim Shared As Integer sfx = 10, sfy = 15' scale factor for display
 Dim Shared As Single start
 Dim Shared As Integer VX, VY, KK
 Dim Shared opctemp As String
+Declare Sub keycheck ' check keys
 #Include Once "inc/c8 instruction set.bi" ' these must go here because depend on cpu type
 #Include Once "inc/decoder.bi" ' same
 
@@ -55,7 +56,7 @@ Declare Sub initcpu ' initialize CPU
 Declare Sub loadprog ' load ROM to memory
 Declare Sub CAE ' cleanup and exit
 Declare Sub render 'render the display
-Declare Sub keycheck ' check keys
+
 
 Sub keycheck
 	If MultiKey(SC_1) Then cpu.key(0) = 1 Else cpu.key(0) = 0
@@ -169,6 +170,7 @@ initcpu
 'loadprog
 'main loop
 start = Timer
+ins_bcdstore
 
 Do
 	cpu.opcount+=1
