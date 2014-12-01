@@ -168,9 +168,10 @@ End Sub
 ScreenRes 640,480,32
 initcpu
 loadprog
+cls
 'main loop
 start = Timer
-ins_bcdstore
+
 
 Do
 	cpu.opcount+=1
@@ -217,6 +218,9 @@ Do
 
 		Case "VXORVY"
 			INS_VXORVY
+			
+		Case "VXANDVY"
+			INS_VXANDVY
 
 		Case "VXXORVY"
 			INS_VXXORVY
@@ -289,6 +293,8 @@ Do
 			Print "Decore error!"
 			Print "Opcode: " & Hex(cpu.opcode)
 			Print "Instruction: " & cpu.instruction
+			Print cpu.opcount
+			sleep
 	End Select
 	
 	If cpu.delaytimer > 0 Then cpu.delaytimer-=1

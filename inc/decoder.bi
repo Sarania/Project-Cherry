@@ -4,7 +4,7 @@ Declare Sub decode(ByVal opc As UShort)
 Sub decode(ByVal opc As UShort)
 	opctemp = UCase(Hex(opc))
 
-	If opctemp = "00E0" Then
+	If opctemp = "E0" Then
 		cpu.instruction = "CLS"
 		Exit Sub
 	End If

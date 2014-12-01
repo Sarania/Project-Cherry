@@ -178,7 +178,6 @@ End Sub
 
 Sub INS_LOADINDEX 'ANNN
 	cpu.index = cpu.opcode And &h0fff
-	
 End Sub
 
 Sub INS_JUMPREG 'BNNN
@@ -195,6 +194,27 @@ cpu.v(vx) = CByte(Rnd*255) And kk
 End Sub
 
 Sub INS_DISPLAY 'DXYN
+Dim n As UShort
+Dim p As ushort
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+vy = cpu.opcode And &h00F0
+vy = vy Shr 4
+n = cpu.opcode And &h000F
+cpu.v(&hf) = 0
+
+For y As Integer = 0 To n-1
+	p = cpu.memory(cpu.index+y)
+	For x As Integer = 0 To 7
+		If (p And (&h80 Shr x)) <> 0 Then
+			If cpu.display(vx+x,vy+y) = 1 Then
+				cpu.v(&hf) = 1
+			EndIf
+			cpu.display(vx+x,vy+y) Xor = 1
+		EndIf
+		
+	Next
+Next
 	
 End Sub
 
