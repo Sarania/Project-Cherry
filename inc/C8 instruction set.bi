@@ -34,8 +34,10 @@ Declare Sub INS_STOREREG 'FX55
 Declare Sub INS_LOADREG 'FX65
 Declare Sub INS_SCROLLN '00CN
 Sub INS_CLS '00E0
-	For i As Integer = 0 To 2047
-		cpu.display(i)=0
+	For y As Integer = 0 To 31
+		For x As Integer = 0 To 63
+			cpu.display(x,y) = 0
+		Next
 	Next
 	cpu.drawflag=1
 End Sub
@@ -207,10 +209,10 @@ For y As Integer = 0 To n-1
 	p = cpu.memory(cpu.index+y)
 	For x As Integer = 0 To 7
 		If (p And (&h80 Shr x)) <> 0 Then
-			If cpu.display((cpu.v(vx) + x + ((cpu.v(vy) + y) * 64))) = 1 Then
+			If cpu.display(cpu.v(vx)+x, cpu.v(vy)+y) = 1 then
 				cpu.v(&hf) = 1
 			EndIf
-			cpu.display(cpu.v(vx) + x + ((cpu.v(vy) + y) * 64)) Xor = 1
+			cpu.display(cpu.v(vx)+x,cpu.v(vy)+y) Xor = 1
 		EndIf	
 	Next
 Next

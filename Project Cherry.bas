@@ -15,7 +15,7 @@ Type Chip8
 	sp As UShort
 	Index As UShort
 	PC As UShort
-	display(0 To 2047) As UByte
+	display(0 To 63, 0 To 31) As UByte
 	delayTimer As UByte
 	soundTimer As UByte
 	key(0 To 15) As UByte
@@ -176,18 +176,16 @@ Sub keycheck
 
 End Sub
 Sub render
-	Dim As Integer q = 0
 	screenbuff = ImageCreate(screenx,screeny,RGB(0,0,0))
-	For y As Integer = 1 To 32
-		For x As Integer = 1 To 64
+	For y As Integer = 0 To 31
+		For x As Integer = 0 To 63
 			For z As Integer = sfy To 1 Step -1
-				If cpu.display(q) = 1 Then
-					Line screenbuff, (x*sfx-sfx,y*sfy-z)-(x*sfx,y*sfy-z), RGB(foreR,foreG,foreB)
+				If cpu.display(x,y) = 1 Then
+					Line screenbuff, (x*sfx-sfx,(y*sfy-z)+10)-(x*sfx,(y*sfy-z)+10), RGB(foreR,foreG,foreB)
 				Else
 					If backR <> 0 Or backG <> 0 Or backB <> 0 Then Line screenbuff, (x*sfx-sfx,y*sfy-z)-(x*sfx,y*sfy-z), RGB(backR,backG,backB)
 				End If
 			Next
-			q+=1
 		Next
 	Next
 	Put (sfx/2,sfy/2),screenbuff,PSet
@@ -207,8 +205,10 @@ Sub initcpu
 	CPU.sp = 0
 	CPU.index = 0
 	CPU.PC = &h200
-	For i As Integer = 0 To 2047
-		cpu.display(i) = 0
+	For y As Integer = 0 To 31
+		For x As Integer = 0 To 63
+			cpu.display(x,y) = 0
+		Next
 	Next
 	CPU.delaytimer = 0
 	CPU.soundtimer = 0
