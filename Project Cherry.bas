@@ -27,6 +27,7 @@ Dim Shared As fb.image Ptr screenbuff ' buffer for screen
 Dim Shared As Single start
 Dim Shared As UInteger VX, VY, KK, screenx, screeny, ops, foreR, foreG, foreB, backR, backG, backB
 Dim Shared As UInteger sfx, sfy' scale factor for display
+Dim Shared As Single version = 0.7
 Dim Shared opctemp As String
 Declare Sub keycheck ' check keys
 #Include Once "inc/c8 instruction set.bi" ' these must go here because depend on cpu type
@@ -58,7 +59,47 @@ Declare Sub loadprog ' load ROM to memory
 Declare Sub CAE ' cleanup and exit
 Declare Sub render 'render the display
 Declare Sub loadini 'load teh ini
+Declare Sub about ' project information
 
+Sub about
+	Dim cherry As fb.image Ptr
+	Dim banner As fb.image Ptr
+	cherry = ImageCreate(128,148,RGB(0,0,0))
+	banner = ImageCreate(400,148,RGB(0,0,0))
+	BLoad ("res/cherry.bmp",cherry)
+	BLoad ("res/banner.bmp",banner)
+	Cls
+	Print "Project Cherry v" & version
+	Print "_____________________"
+	Print
+	Print "Project Cherry is a Chip8 emulator written in FreeBASIC."
+	Print ""
+	Print "CHIP-8 is an interpreted programming language, developed by Joseph Weisbecker."
+	Print ""
+	Print "It was initially used on the COSMAC VIP and Telmac 1800 8-bit microcomputers in"
+	Print ""
+	Print "the mid 1970s. CHIP-8 programs are run on a CHIP-8 virtual machine or emulator."
+	Print
+	Print
+	Print
+	Print
+	Print
+	Print "Project Cherry was written by:"
+	Print "______________________________"
+	Print
+	Print "Blyss Sarania"
+	Print
+	Print "Nobbs66"
+	Put (screenx-128,screeny-148), cherry, Trans
+	Put (0,screeny-148), banner, Trans
+	Locate 49, 1:
+	Print "Compiled on: " + Str(__DATE__) + " at " + Str(__TIME__)
+	Print "Compiled with FreeBASIC version " + Str(__FB_VER_MAJOR__) + "." + Str(__FB_VER_MINOR__) + "." + Str(__FB_VER_PATCH__)
+	ImageDestroy(cherry)
+	ImageDestroy(banner)
+	Sleep
+	cpu.drawflag = 1
+End Sub
 Sub loadini
 	Dim f As Integer = FreeFile
 	If Not FileExists(ExePath & "\cherry.ini") Then
@@ -108,6 +149,10 @@ Sub keycheck
 	If MultiKey(SC_v) Then cpu.key(15) = 1 Else cpu.key(15) = 0
 	If MultiKey(SC_ESCAPE) Then
 		CAE
+	EndIf
+	If MultiKey(SC_HOME) Then
+		about
+		cls
 	EndIf
 
 End Sub
