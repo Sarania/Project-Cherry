@@ -24,9 +24,9 @@ End Type
 
 Dim Shared As chip8 CPU ' main cpu
 Dim Shared As fb.image Ptr screenbuff ' buffer for screen
-Dim Shared As Integer sfx = 10, sfy = 15' scale factor for display
 Dim Shared As Single start
-Dim Shared As UInteger VX, VY, KK
+Dim Shared As UInteger VX, VY, KK, screenx, screeny, ops
+Dim Shared As UInteger sfx, sfy' scale factor for display
 Dim Shared opctemp As String
 Declare Sub keycheck ' check keys
 #Include Once "inc/c8 instruction set.bi" ' these must go here because depend on cpu type
@@ -57,6 +57,24 @@ Declare Sub initcpu ' initialize CPU
 Declare Sub loadprog ' load ROM to memory
 Declare Sub CAE ' cleanup and exit
 Declare Sub render 'render the display
+Declare Sub loadini 'load teh ini
+
+Sub loadini
+	Dim f As Integer = FreeFile
+	If Not FileExists(ExePath & "\cherry.ini") Then
+		Open ExePath & "\cherry.ini" For Output As #f
+		Print #f, 640
+		Print #f, 480
+		Print #f, 120
+		Close #f
+	EndIf
+	Open ExePath & "\cherry.ini" For Input As #f
+	Input #f, screenx
+	Input #f, screeny
+	Input #f, ops
+	Close #f
+End Sub
+
 
 
 Sub keycheck
@@ -83,7 +101,7 @@ Sub keycheck
 End Sub
 Sub render
 	Dim As Integer q = 0
-	screenbuff = ImageCreate(640,480,RGB(0,0,0))
+	screenbuff = ImageCreate(screenx,screeny,RGB(0,0,0))
 	For y As Integer = 1 To 32
 		For x As Integer = 1 To 64
 			For z As Integer = sfy To 1 Step -1
@@ -169,8 +187,11 @@ End Sub
 
 
 'PROGRAM START
-ScreenRes 640,480,32
-Randomize timer
+Randomize Timer
+loadini
+ScreenRes screenx,screeny,32
+sfx = screenx/64
+sfy = screeny/32
 initcpu
 loadprog
 cls
@@ -182,7 +203,7 @@ start = Timer
 Do
 	cpu.opcount+=1
 	
-	While cpu.opcount / 360 > Timer - start 'limit to 60 op per sec
+	While cpu.opcount / ops > Timer - start 'limit to 60 op per sec
 		Sleep 15
 	Wend
 
