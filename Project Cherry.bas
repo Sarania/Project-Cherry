@@ -76,13 +76,16 @@ Sub keycheck
 	If MultiKey(SC_x) Then cpu.key(13) = 1 Else cpu.key(13) = 0
 	If MultiKey(SC_c) Then cpu.key(14) = 1 Else cpu.key(14) = 0
 	If MultiKey(SC_v) Then cpu.key(15) = 1 Else cpu.key(15) = 0
+	If MultiKey(SC_ESCAPE) Then
+		CAE
+	EndIf
 	
 End Sub
 Sub render
 	Dim As Integer q = 0
 	screenbuff = ImageCreate(640,480,RGB(0,0,0))
-	For y As Integer = 0 To 31
-		For x As Integer = 0 To 63
+	For y As Integer = 1 To 32
+		For x As Integer = 1 To 64
 			For z As Integer = sfy To 1 Step -1
 				If cpu.display(q) = 1 Then Line screenbuff, (x*sfx-sfx,y*sfy-z)-(x*sfx,y*sfy-z)
 			Next
@@ -167,6 +170,7 @@ End Sub
 
 'PROGRAM START
 ScreenRes 640,480,32
+Randomize timer
 initcpu
 loadprog
 cls
@@ -190,6 +194,8 @@ Do
 	Locate 1,1: Print cpu.instruction & "          "
 	Print "1-2-3-4-q-w-e-r-a-s-d-f-z-x-c-v"
 	Print cpu.key(0) & "-" & cpu.key(1) & "-" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
+	Print "Delay timer: " & cpu.delayTimer
+	Print "Sound timer: " & cpu.soundTimer
 	cpu.pc+=2
 	keycheck
 	Select Case cpu.instruction
