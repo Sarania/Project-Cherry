@@ -161,10 +161,48 @@ Sub decode(ByVal opc As UShort)
 		EndIf
 		If Right(opctemp,2) = "65" Then
 			cpu.instruction = "LOADREG"
-			Exit sub
+			Exit Sub
+		
 		EndIf
 	End If
-	
+	'Start of SCHIP
+		If Right(opctemp, 2) = "CN" Then 
+			cpu.instruction = "SCROLLN"
+			Exit Sub
+		EndIf 
+		If Right(opctemp, 2) = "FB" Then 
+			cpu.instruction = "RIGHTSCR"
+			Exit Sub
+		EndIf
+		If Right(opctemp, 2) = "FC" Then 
+			cpu.instruction = "LEFTSCR" 
+			Exit Sub
+		EndIf 
+		If Right(opctemp, 2) = "FD" Then 
+			cpu.instruction = "EXCHIP"
+			Exit Sub
+		EndIf
+		If Right(opctemp, 2) = "FE" Then 
+			cpu.instruction = "DISEXT"
+			Exit Sub
+		EndIf
+		If Right(opctemp, 2) = "FF" Then 
+			cpu.instruction = "ENEXT" 
+			Exit Sub
+		EndIf
+		If Right(opctemp, 2) = "30" Then
+			cpu.instruction = "TENSPRITE"
+			Exit Sub
+		EndIf
+		If Right(opctemp, 2) = "75" Then 
+			cpu.instruction = "STORERPL"
+			Exit Sub
+		EndIf
+		If Right(opctemp, 2) = "85" Then
+			cpu.instruction = "READRPL"
+			Exit Sub
+			
+		EndIf
 	cpu.instruction = "BAD DECODE"
 	
 

@@ -32,7 +32,7 @@ Declare Sub INS_ISPRITE 'FX29
 Declare Sub INS_BCDSTORE 'FX33
 Declare Sub INS_STOREREG 'FX55
 Declare Sub INS_LOADREG 'FX65
-
+Declare Sub INS_SCROLLN '00CN
 Sub INS_CLS '00E0
 	For i As Integer = 0 To 2047
 		cpu.display(i)=0
@@ -41,7 +41,9 @@ Sub INS_CLS '00E0
 End Sub
 
 Sub INS_RET '00EE
+	
 	cpu.pc = cpu.stack(cpu.sp)
+	cpu.stack(cpu.sp) = 0
 	cpu.sp-=1
 End Sub
 
@@ -298,4 +300,34 @@ Vx = vx Shr 8
 		cpu.v(i) = cpu.memory(cpu.index+i)
 	Next
 	cpu.index+= vx+1
+End Sub
+Sub INS_SCROLLN '00CN
+	
+End Sub
+
+Sub INS_RIGHTSCR '00FB
+	
+End Sub
+
+Sub INS_LEFTSCR '00FC
+	
+End Sub
+
+Sub INS_EXCHIP '00FD
+	
+End Sub
+Sub INS_DISEXT '00FE
+	
+End Sub
+Sub INS_ENEXT  '00FF
+	
+End Sub
+Sub INS_TENSPRITE 'FX30
+	
+End Sub
+Sub INS_STORERPL 'FX75
+	
+End Sub
+Sub INS_READRPL 'FX85
+	
 End Sub

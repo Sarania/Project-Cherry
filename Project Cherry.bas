@@ -19,6 +19,7 @@ Type Chip8
 	delayTimer As UByte
 	soundTimer As UByte
 	key(0 To 15) As UByte
+	hp48(0 To 6) As UByte 
 End Type
 
 
@@ -401,7 +402,34 @@ Do
 
 		Case "LOADREG"
 			INS_LOADREG
-
+		
+		Case "SCROLLN"
+			INS_SCROLLN
+			
+		Case "RIGHTSCR"
+			INS_RIGHTSCR
+			
+		Case "LEFTSCR"
+			INS_LEFTSCR
+		
+		Case "EXCHIP"
+			INS_EXCHIP
+		
+		Case "DISEXT"
+			INS_DISEXT
+		
+		Case "ENEXT"
+			INS_ENEXT
+		
+		Case "TENSPRITE"
+			INS_TENSPRITE
+		
+		Case "STORERPL"
+			INS_STORERPL
+			
+		Case "READRPL"
+			INS_READRPL
+			
 		Case Else
 			Cls
 			Print "Decore error!"
