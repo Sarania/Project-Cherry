@@ -34,11 +34,10 @@ Declare Sub INS_STOREREG 'FX55
 Declare Sub INS_LOADREG 'FX65
 
 Sub INS_CLS '00E0
-	For y As Integer = 0 To 31
-		For x As Integer = 0 To 63
-			cpu.display(x,y) = 0
-		Next
-		Next
+	For i As Integer = 0 To 2047
+		cpu.display(i)=0
+	Next
+	cpu.drawflag=1
 End Sub
 
 Sub INS_RET '00EE
@@ -79,7 +78,7 @@ If cpu.v(vx) = cpu.v(vy) Then cpu.pc+=2
 End Sub
 
 Sub INS_LOADKK '6XKK
-	Vx = cpu.opcode and &H0F00
+Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
 KK = cpu.opcode And &h00FF
 cpu.v(vx) = KK
@@ -106,7 +105,7 @@ Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
 vy = cpu.opcode And &h00F0
 vy = vy Shr 4
-cpu.v(vx) = cpu.v(vx) Or cpu.v(vy)
+cpu.v(vx) Or = cpu.v(vy)
 End Sub
 
 Sub INS_VXANDVY '8XY2
@@ -114,7 +113,7 @@ Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
 vy = cpu.opcode And &h00F0
 vy = vy Shr 4
-cpu.v(vx) = cpu.v(vx) And cpu.v(vy)
+cpu.v(vx) And = cpu.v(vy)
 	
 End Sub
 
@@ -123,7 +122,7 @@ Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
 vy = cpu.opcode And &h00F0
 vy = vy Shr 4
-cpu.v(vx) = cpu.v(vx) Xor cpu.v(vy)
+cpu.v(vx) Xor = cpu.v(vy)
 End Sub
 
 Sub INS_ADC '8XY4
@@ -132,6 +131,7 @@ Vx = vx Shr 8
 vy = cpu.opcode And &h00F0
 vy = vy Shr 4
 If cpu.v(vx) + cpu.v(vy) > 255 Then cpu.v(&hF) = 1 Else cpu.v(&hF) = 0
+'If cpu.v(vy) > (&hff - cpu.v(vx)) Then cpu.v(&hf) = 1 Else cpu.v(&hf)=0
 cpu.v(vx) = cpu.v(vx) + cpu.v(vy)
 End Sub
 
@@ -141,14 +141,14 @@ Vx = vx Shr 8
 vy = cpu.opcode And &h00F0
 vy = vy Shr 4
 If cpu.v(vx) > cpu.v(vy) Then cpu.v(&Hf) = 1 Else cpu.v(&hF) = 0
-cpu.v(vx) = cpu.v(vx) - cpu.v(vy)
+cpu.v(vx) -= cpu.v(vy)
 End Sub
 
 Sub INS_SHIFTR '8XY6
-	Vx = cpu.opcode and &H0F00
+Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
-If cpu.v(vx) Shl 8 = 1 Then cpu.V(&hF) = 1 Else cpu.V(&hF) = 0
-cpu.v(vx) /= 2
+If Bit(cpu.v(vx),1) Then cpu.v(&hf) = 1 Else cpu.v(&hf) = 0
+cpu.v(vx) = cpu.v(vx) Shr 1
 End Sub
 
 Sub INS_SUBN '8XY7
@@ -157,7 +157,7 @@ Vx = vx Shr 8
 vy = cpu.opcode And &h00F0
 vy = vy Shr 4
 If cpu.v(vy) > cpu.v(vx) Then cpu.v(&Hf) = 1 Else cpu.v(&hF) = 0
-cpu.v(vx) = cpu.v(vy)=cpu.v(vx)
+cpu.v(vx) = cpu.v(vy) - cpu.v(vx)
 End Sub
 
 Sub INS_SHIFTL '8XYE
@@ -181,16 +181,14 @@ Sub INS_LOADINDEX 'ANNN
 End Sub
 
 Sub INS_JUMPREG 'BNNN
-	Dim btemp As UShort
-	btemp = (cpu.opcode And &h0FFF) +cpu.v(0)
-	cpu.pc = btemp
+	cpu.pc = (cpu.opcode And &h0FFF) +cpu.v(0)
 End Sub
 
 Sub INS_RNDANDKK 'CXKK
 Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
 KK = cpu.opcode And &h00FF
-cpu.v(vx) = CByte(Rnd*255) And kk
+cpu.v(vx) = (CByte(Rnd*255)) And kk
 End Sub
 
 Sub INS_DISPLAY 'DXYN
@@ -207,27 +205,27 @@ For y As Integer = 0 To n-1
 	p = cpu.memory(cpu.index+y)
 	For x As Integer = 0 To 7
 		If (p And (&h80 Shr x)) <> 0 Then
-			If cpu.display(vx+x,vy+y) = 1 Then
+			If cpu.display((cpu.v(vx) + x + ((cpu.v(vy) + y) * 64))) = 1 Then
 				cpu.v(&hf) = 1
 			EndIf
-			cpu.display(vx+x,vy+y) Xor = 1
+			cpu.display(cpu.v(vx) + x + ((cpu.v(vy) + y) * 64)) Xor = 1
 		EndIf
 		
 	Next
 Next
-	
+	cpu.drawflag=1
 End Sub
 
 Sub INS_KEYSKIP 'EX9E
 Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
-If cpu.key(vx) = 1 Then cpu.pc+=2
+If cpu.key(cpu.v(vx)) <> 0 Then cpu.pc+=2
 End Sub
 
 Sub INS_KEYNOTSKIP 'EXA1
 Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
-If cpu.key(vx) = 0 Then cpu.pc+=2
+If cpu.key(cpu.v(vx)) = 0 Then cpu.pc+=2
 End Sub
 
 Sub INS_VXDELAY 'FX07
@@ -238,8 +236,8 @@ End Sub
 Sub INS_KEYWAIT 'FX0A
 	Do
 		keycheck
-		For i As Integer = 1 To 15
-			If cpu.key(i) = 1 Then Exit do
+		For i As Integer = 0 To 15
+			If cpu.key(i) <> 0 Then Exit do
 		Next
 		Sleep 15
 	Loop
@@ -259,13 +257,14 @@ End Sub
 Sub INS_IPLUSVX 'FX1E
 Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
+If cpu.index + cpu.v(vx) > &hFFF Then cpu.v(&hf) = 1 Else cpu.v(&hf) = 0
 cpu.index = cpu.index + cpu.v(vx)
 End Sub
 
 Sub INS_ISPRITE 'FX29
 Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
-cpu.index = (vx*5)
+cpu.index = (cpu.v(vx)*5)
 End Sub
 
 Sub INS_BCDSTORE 'FX33
@@ -283,14 +282,19 @@ cpu.memory(cpu.index+2) = CInt(ones)
 End Sub
 
 Sub INS_STOREREG 'FX55
-	For I As Integer = 0 To 14
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+	For I As Integer = 0 To vx
 		cpu.memory(cpu.index + i) = cpu.v(i)
 	Next
+	cpu.index+= vx+1
 End Sub
 
 Sub INS_LOADREG 'FX65
-	For i As Integer = 0 To 14
+Vx = cpu.opcode and &H0F00
+Vx = vx Shr 8
+	For i As Integer = 0 To vx
 		cpu.v(i) = cpu.memory(cpu.index+i)
 	Next
-	
+	cpu.index+= vx+1
 End Sub
