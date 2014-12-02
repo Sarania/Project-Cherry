@@ -154,6 +154,20 @@ Sub keycheck
 		about
 		cls
 	EndIf
+	
+	If MultiKey(SC_PAGEUP) Then
+		ops + = 30
+		While MultiKey(SC_PAGEUP)
+			Sleep 15
+		Wend
+	EndIf
+	
+	If MultiKey(SC_PAGEDOWN) Then
+		ops - = 30
+		While MultiKey(SC_PAGEDOWN)
+			Sleep 15
+		Wend
+	EndIf
 
 End Sub
 Sub render
@@ -278,6 +292,7 @@ Do
 	Print cpu.key(0) & "-" & cpu.key(1) & "-" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
 	Print "Delay timer: " & cpu.delayTimer
 	Print "Sound timer: " & cpu.soundTimer
+	Print "Ops per second: " & ops
 	cpu.pc+=2
 	keycheck
 	Select Case cpu.instruction
