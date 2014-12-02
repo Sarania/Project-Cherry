@@ -229,6 +229,7 @@ End Sub
 
 Sub INS_VXDELAY 'FX07
 	vx = cpu.opcode And &h0f00
+	vx = vx Shr 8
 	cpu.V(vx) = cpu.delayTimer
 End Sub
 
