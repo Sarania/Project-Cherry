@@ -25,7 +25,7 @@ End Type
 Dim Shared As chip8 CPU ' main cpu
 Dim Shared As fb.image Ptr screenbuff ' buffer for screen
 Dim Shared As Single start
-Dim Shared As UInteger VX, VY, KK, screenx, screeny, ops
+Dim Shared As UInteger VX, VY, KK, screenx, screeny, ops, foreR, foreG, foreB, backR, backG, backB
 Dim Shared As UInteger sfx, sfy' scale factor for display
 Dim Shared opctemp As String
 Declare Sub keycheck ' check keys
@@ -66,12 +66,24 @@ Sub loadini
 		Print #f, 640
 		Print #f, 480
 		Print #f, 120
+		Print #f, 255
+		Print #f, 255
+		Print #f, 255
+		Print #f, 0
+		Print #f, 0
+		Print #f, 0
 		Close #f
 	EndIf
 	Open ExePath & "\cherry.ini" For Input As #f
 	Input #f, screenx
 	Input #f, screeny
 	Input #f, ops
+	Input #f, foreR
+	Input #f, foreG
+	Input #f, foreB
+	Input #f, backR
+	Input #f, backG
+	Input #f, backB
 	Close #f
 End Sub
 
@@ -97,7 +109,7 @@ Sub keycheck
 	If MultiKey(SC_ESCAPE) Then
 		CAE
 	EndIf
-	
+
 End Sub
 Sub render
 	Dim As Integer q = 0
@@ -105,7 +117,11 @@ Sub render
 	For y As Integer = 1 To 32
 		For x As Integer = 1 To 64
 			For z As Integer = sfy To 1 Step -1
-				If cpu.display(q) = 1 Then Line screenbuff, (x*sfx-sfx,y*sfy-z)-(x*sfx,y*sfy-z)
+				If cpu.display(q) = 1 Then
+					Line screenbuff, (x*sfx-sfx,y*sfy-z)-(x*sfx,y*sfy-z), RGB(foreR,foreG,foreB)
+				Else
+					If backR <> 0 Or backG <> 0 Or backB <> 0 Then Line screenbuff, (x*sfx-sfx,y*sfy-z)-(x*sfx,y*sfy-z), RGB(backR,backG,backB)
+				End If
 			Next
 			q+=1
 		Next
@@ -202,7 +218,7 @@ start = Timer
 
 Do
 	cpu.opcount+=1
-	
+
 	While cpu.opcount / ops > Timer - start 'limit to 60 op per sec
 		Sleep 15
 	Wend
@@ -252,7 +268,7 @@ Do
 
 		Case "VXORVY"
 			INS_VXORVY
-			
+
 		Case "VXANDVY"
 			INS_VXANDVY
 
@@ -330,7 +346,7 @@ Do
 			Print cpu.opcount
 			sleep
 	End Select
-	
+
 	If cpu.delaytimer > 0 Then cpu.delaytimer-=1
 	If cpu.soundtimer > 0 Then cpu.soundtimer-=1
 
