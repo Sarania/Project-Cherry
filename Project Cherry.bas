@@ -4,6 +4,7 @@ Using FB
 #Include Once "file.bi"
 
 Type Chip8
+	drawflag As byte
 	opcount As ulongint
 	instruction As String
 	opcode As UShort
@@ -14,7 +15,7 @@ Type Chip8
 	sp As UShort
 	Index As UShort
 	PC As UShort
-	display(0 To 63,0 To 31) As UByte
+	display(0 To 2047) As UByte
 	delayTimer As UByte
 	soundTimer As UByte
 	key(0 To 15) As UByte
@@ -25,7 +26,7 @@ Dim Shared As chip8 CPU ' main cpu
 Dim Shared As fb.image Ptr screenbuff ' buffer for screen
 Dim Shared As Integer sfx = 10, sfy = 15' scale factor for display
 Dim Shared As Single start
-Dim Shared As Integer VX, VY, KK
+Dim Shared As UInteger VX, VY, KK
 Dim Shared opctemp As String
 Declare Sub keycheck ' check keys
 #Include Once "inc/c8 instruction set.bi" ' these must go here because depend on cpu type
@@ -78,12 +79,14 @@ Sub keycheck
 	
 End Sub
 Sub render
+	Dim As Integer q = 0
 	screenbuff = ImageCreate(640,480,RGB(0,0,0))
 	For y As Integer = 0 To 31
 		For x As Integer = 0 To 63
 			For z As Integer = sfy To 1 Step -1
-				If cpu.display(x,y) = 1 Then Line screenbuff, (x*sfx-sfx,y*sfy-z)-(x*sfx,y*sfy-z)
+				If cpu.display(q) = 1 Then Line screenbuff, (x*sfx-sfx,y*sfy-z)-(x*sfx,y*sfy-z)
 			Next
+			q+=1
 		Next
 	Next
 	Put (sfx/2,sfy/2),screenbuff,PSet
@@ -103,10 +106,8 @@ Sub initcpu
 	CPU.sp = 0
 	CPU.index = 0
 	CPU.PC = &h200
-	For y As Integer = 0 To 31
-		For x As Integer = 0 To 63
-			cpu.display(x,y) = 0
-		Next
+	For i As Integer = 0 To 2047
+		cpu.display(i) = 0
 	Next
 	CPU.delaytimer = 0
 	CPU.soundtimer = 0
@@ -173,6 +174,7 @@ cls
 start = Timer
 
 
+
 Do
 	cpu.opcount+=1
 	
@@ -180,10 +182,13 @@ Do
 		Sleep 15
 	Wend
 
-	render
+	If cpu.drawflag = 1 Then render
+	cpu.drawflag = 0
+	keycheck
 	cpu.opcodePTR = @cpu.memory(cpu.pc)
 	cpu.opcode = (LoByte(*cpu.opcodePTR) Shl 8 ) + HiByte(*cpu.opcodePTR)
 	decode(cpu.opcode)
+	Locate 1,1: Print cpu.instruction & "          "
 	cpu.pc+=2
 	Select Case cpu.instruction
 		Case "CLS"
