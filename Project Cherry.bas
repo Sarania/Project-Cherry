@@ -178,18 +178,20 @@ start = Timer
 Do
 	cpu.opcount+=1
 	
-	While cpu.opcount / 60 > Timer - start 'limit to 60 op per sec
+	While cpu.opcount / 360 > Timer - start 'limit to 60 op per sec
 		Sleep 15
 	Wend
 
 	If cpu.drawflag = 1 Then render
 	cpu.drawflag = 0
-	keycheck
 	cpu.opcodePTR = @cpu.memory(cpu.pc)
 	cpu.opcode = (LoByte(*cpu.opcodePTR) Shl 8 ) + HiByte(*cpu.opcodePTR)
 	decode(cpu.opcode)
 	Locate 1,1: Print cpu.instruction & "          "
+	Print "1-2-3-4-q-w-e-r-a-s-d-f-z-x-c-v"
+	Print cpu.key(0) & "-" & cpu.key(1) & "-" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
 	cpu.pc+=2
+	keycheck
 	Select Case cpu.instruction
 		Case "CLS"
 			INS_CLS

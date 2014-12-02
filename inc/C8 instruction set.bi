@@ -209,8 +209,7 @@ For y As Integer = 0 To n-1
 				cpu.v(&hf) = 1
 			EndIf
 			cpu.display(cpu.v(vx) + x + ((cpu.v(vy) + y) * 64)) Xor = 1
-		EndIf
-		
+		EndIf	
 	Next
 Next
 	cpu.drawflag=1
@@ -265,6 +264,7 @@ Sub INS_ISPRITE 'FX29
 Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
 cpu.index = (cpu.v(vx)*5)
+cpu.drawflag=1
 End Sub
 
 Sub INS_BCDSTORE 'FX33
