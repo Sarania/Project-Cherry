@@ -273,9 +273,9 @@ Dim As integer temp
 Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
 temp = cpu.v(vx)
-hundreds = Left(Str(temp),1)
+If temp > 99 Then hundreds = Left(Str(temp),1)
 ones = right(Str(temp),1)
-tens = Left(Right(Str(temp),2),1)
+If temp > 9 Then tens = Left(Right(Str(temp),2),1)
 cpu.memory(cpu.index) = CInt(hundreds)
 cpu.memory(cpu.index+1) = CInt(tens)
 cpu.memory(cpu.index+2) = CInt(ones)
