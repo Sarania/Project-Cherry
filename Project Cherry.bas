@@ -157,6 +157,8 @@ Sub keycheck
 	
 	If MultiKey(SC_PAGEUP) Then
 		ops + = 30
+		start = Timer
+		cpu.opcount = 0
 		While MultiKey(SC_PAGEUP)
 			Sleep 15
 		Wend
@@ -164,6 +166,8 @@ Sub keycheck
 	
 	If MultiKey(SC_PAGEDOWN) Then
 		ops - = 30
+		start = Timer
+		cpu.opcount = 0
 		While MultiKey(SC_PAGEDOWN)
 			Sleep 15
 		Wend
