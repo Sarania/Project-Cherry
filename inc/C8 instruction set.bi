@@ -238,10 +238,15 @@ Sub INS_VXDELAY 'FX07
 End Sub
 
 Sub INS_KEYWAIT 'FX0A
+	vx = cpu.opcode And &h0f00
+	vx = vx Shr 8
 	Do
 		keycheck
 		For i As Integer = 0 To 15
-			If cpu.key(i) <> 0 Then Exit do
+			If cpu.key(i) <> 0 Then 
+				cpu.v(vx) = i
+				Exit Do
+			EndIf
 		Next
 		Sleep 15
 	Loop

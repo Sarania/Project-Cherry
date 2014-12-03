@@ -135,21 +135,21 @@ End Sub
 
 
 Sub keycheck
-	If MultiKey(SC_1) Then cpu.key(0) = 1 Else cpu.key(0) = 0
-	If MultiKey(SC_2) Then cpu.key(1) = 1 Else cpu.key(1) = 0
-	If MultiKey(SC_3) Then cpu.key(2) = 1 Else cpu.key(2) = 0
-	If MultiKey(SC_4) Then cpu.key(3) = 1 Else cpu.key(3) = 0
+	If MultiKey(SC_1) Then cpu.key(1) = 1 Else cpu.key(1) = 0
+	If MultiKey(SC_2) Then cpu.key(2) = 1 Else cpu.key(2) = 0
+	If MultiKey(SC_3) Then cpu.key(3) = 1 Else cpu.key(3) = 0
+	If MultiKey(SC_4) Then cpu.key(12) = 1 Else cpu.key(12) = 0
+	If MultiKey(sc_r) Then cpu.key(13) = 1 Else cpu.key(13) = 0
+	If MultiKey(sc_a) Then cpu.key(7) = 1 Else cpu.key(7) = 0
+	If MultiKey(sc_s) Then cpu.key(8) = 1 Else cpu.key(8) = 0
+	If MultiKey(SC_d) Then cpu.key(9) = 1 Else cpu.key(9) = 0
+	If MultiKey(sc_f) Then cpu.key(14) = 1 Else cpu.key(14) = 0
 	If MultiKey(SC_q) Then cpu.key(4) = 1 Else cpu.key(4) = 0
 	If MultiKey(SC_w) Then cpu.key(5) = 1 Else cpu.key(5) = 0
 	If MultiKey(SC_e) Then cpu.key(6) = 1 Else cpu.key(6) = 0
-	If MultiKey(SC_r) Then cpu.key(7) = 1 Else cpu.key(7) = 0
-	If MultiKey(SC_a) Then cpu.key(8) = 1 Else cpu.key(8) = 0
-	If MultiKey(SC_s) Then cpu.key(9) = 1 Else cpu.key(9) = 0
-	If MultiKey(SC_d) Then cpu.key(10) = 1 Else cpu.key(10) = 0
-	If MultiKey(SC_f) Then cpu.key(11) = 1 Else cpu.key(11) = 0
-	If MultiKey(SC_z) Then cpu.key(12) = 1 Else cpu.key(12) = 0
-	If MultiKey(SC_x) Then cpu.key(13) = 1 Else cpu.key(13) = 0
-	If MultiKey(SC_c) Then cpu.key(14) = 1 Else cpu.key(14) = 0
+	If MultiKey(SC_z) Then cpu.key(10) = 1 Else cpu.key(10) = 0
+	If MultiKey(SC_x) Then cpu.key(0) = 1 Else cpu.key(0) = 0
+	If MultiKey(SC_c) Then cpu.key(11) = 1 Else cpu.key(11) = 0
 	If MultiKey(SC_v) Then cpu.key(15) = 1 Else cpu.key(15) = 0
 	If MultiKey(SC_ESCAPE) Then
 		CAE
