@@ -1,7 +1,8 @@
-'decoder for Chip 8
+'Decoder for Chip 8 emulator
+'converts opcodes to instructions
 Declare Sub decode(ByVal opc As UShort)
 
-Sub decode(ByVal opc As UShort)
+Sub decode(ByVal opc As UShort) ' I realize this is a mess, with EXIT SUB everywhere and what not, but this was the most readable way to do this
 	Dim As String opctemp = UCase(Hex(opc))
 
 	If opctemp = "E0" Then
