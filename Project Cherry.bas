@@ -3,9 +3,11 @@
 Using FB
 #Include Once "file.bi"
 
+Dim Shared As UByte debug = 1
+
 Type Chip8
-	drawflag As byte
-	opcount As ulongint
+	drawflag As Byte
+	opcount As ULongInt
 	instruction As String
 	opcode As UShort
 	opcodePTR As UShort Pointer
@@ -19,7 +21,7 @@ Type Chip8
 	delayTimer As UByte
 	soundTimer As UByte
 	key(0 To 15) As UByte
-	hp48(0 To 6) As UByte 
+	hp48(0 To 6) As UByte
 End Type
 
 
@@ -153,9 +155,9 @@ Sub keycheck
 	EndIf
 	If MultiKey(SC_HOME) Then
 		about
-		cls
+		Cls
 	EndIf
-	
+
 	If MultiKey(SC_PAGEUP) Then
 		ops + = 30
 		start = Timer
@@ -164,7 +166,7 @@ Sub keycheck
 			Sleep 15
 		Wend
 	EndIf
-	
+
 	If MultiKey(SC_PAGEDOWN) Then
 		ops - = 30
 		start = Timer
@@ -274,7 +276,7 @@ sfx = screenx/64
 sfy = screeny/32
 initcpu
 loadprog
-cls
+Cls
 'main loop
 start = Timer
 
@@ -292,12 +294,14 @@ Do
 	cpu.opcodePTR = @cpu.memory(cpu.pc)
 	cpu.opcode = (LoByte(*cpu.opcodePTR) Shl 8 ) + HiByte(*cpu.opcodePTR)
 	decode(cpu.opcode)
-	Locate 1,1: Print cpu.instruction & "          "
-	Print "1-2-3-4-q-w-e-r-a-s-d-f-z-x-c-v"
-	Print cpu.key(0) & "-" & cpu.key(1) & "-" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
-	Print "Delay timer: " & cpu.delayTimer
-	Print "Sound timer: " & cpu.soundTimer
-	Print "Ops per second: " & ops
+	If debug = 1 Then
+		Locate 1,1: Print cpu.instruction & "          "
+		Print "1-2-3-4-q-w-e-r-a-s-d-f-z-x-c-v"
+		Print cpu.key(0) & "_" & cpu.key(1) & "_" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
+		Print "Delay timer: " & cpu.delayTimer
+		Print "Sound timer: " & cpu.soundTimer
+		Print "Ops per second: " & ops
+	End If
 	cpu.pc+=2
 	keycheck
 	Select Case cpu.instruction
@@ -402,41 +406,41 @@ Do
 
 		Case "LOADREG"
 			INS_LOADREG
-		
+
 		Case "SCROLLN"
 			INS_SCROLLN
-			
+
 		Case "RIGHTSCR"
 			INS_RIGHTSCR
-			
+
 		Case "LEFTSCR"
 			INS_LEFTSCR
-		
+
 		Case "EXCHIP"
 			INS_EXCHIP
-		
+
 		Case "DISEXT"
 			INS_DISEXT
-		
+
 		Case "ENEXT"
 			INS_ENEXT
-		
+
 		Case "TENSPRITE"
 			INS_TENSPRITE
-		
+
 		Case "STORERPL"
 			INS_STORERPL
-			
+
 		Case "READRPL"
 			INS_READRPL
-			
+
 		Case Else
 			Cls
 			Print "Decore error!"
 			Print "Opcode: " & Hex(cpu.opcode)
 			Print "Instruction: " & cpu.instruction
 			Print cpu.opcount
-			sleep
+			Sleep
 	End Select
 
 	If cpu.delaytimer > 0 Then cpu.delaytimer-=1
