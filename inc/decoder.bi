@@ -2,7 +2,7 @@
 Declare Sub decode(ByVal opc As UShort)
 
 Sub decode(ByVal opc As UShort)
-	opctemp = UCase(Hex(opc))
+	Dim As String opctemp = UCase(Hex(opc))
 
 	If opctemp = "E0" Then
 		cpu.instruction = "CLS"

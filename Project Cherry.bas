@@ -27,11 +27,12 @@ End Type
 
 Dim Shared As chip8 CPU ' main cpu
 Dim Shared As fb.image Ptr screenbuff ' buffer for screen
-Dim Shared As Single start
-Dim Shared As UInteger VX, VY, KK, screenx, screeny, ops, foreR, foreG, foreB, backR, backG, backB
+Dim Shared As double start, chipstart ' start is used for opcode timing, chipstart for chip8 timers
+Dim Shared As UInteger VX, VY, KK 'Chip 8 vars
+Dim Shared As UInteger screenx, screeny, ops 'screen size, and ops per second
+Dim Shared As UInteger foreR, foreG, foreB, backR, backG, backB ' screen colors
 Dim Shared As UInteger sfx, sfy' scale factor for display
-Dim Shared As Single version = 0.7
-Dim Shared opctemp As String
+Dim Shared As Single version = 0.7 'version
 Declare Sub keycheck ' check keys
 #Include Once "inc/c8 instruction set.bi" ' these must go here because depend on cpu type
 #Include Once "inc/decoder.bi" ' same
@@ -279,6 +280,7 @@ loadprog
 Cls
 'main loop
 start = Timer
+chipstart = timer
 
 
 
@@ -442,8 +444,9 @@ Do
 			Print cpu.opcount
 			Sleep
 	End Select
-
+If Timer-chipstart > 0.01667 Then
 	If cpu.delaytimer > 0 Then cpu.delaytimer-=1
 	If cpu.soundtimer > 0 Then cpu.soundtimer-=1
-
+	chipstart = timer
+End If
 Loop While Not MultiKey(SC_ESCAPE)
