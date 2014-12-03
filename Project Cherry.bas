@@ -1,4 +1,5 @@
 'Chip 8 Emulator in FreeBASIC
+'Written by Blyss Sarania and Nobbs66
 #Include Once "fbgfx.bi"
 Using FB
 #Include Once "file.bi"
@@ -64,6 +65,14 @@ Declare Sub CAE ' cleanup and exit
 Declare Sub render 'render the display
 Declare Sub loadini 'load teh ini
 Declare Sub about ' project information
+Declare Sub extract
+
+Sub extract
+	Vx = cpu.opcode and &H0F00
+	Vx = vx Shr 8
+	vy = cpu.opcode And &h00F0
+	vy = vy Shr 4
+End Sub
 
 Sub about
 	Dim cherry As fb.image Ptr
@@ -306,6 +315,7 @@ Do
 	End If
 	cpu.pc+=2
 	keycheck
+	extract ' pull VX and VY out of cpu.opcode
 	Select Case cpu.instruction
 		Case "CLS"
 			INS_CLS
@@ -444,9 +454,9 @@ Do
 			Print cpu.opcount
 			Sleep
 	End Select
-If Timer-chipstart > 0.01667 Then
-	If cpu.delaytimer > 0 Then cpu.delaytimer-=1
-	If cpu.soundtimer > 0 Then cpu.soundtimer-=1
-	chipstart = timer
-End If
+	If Timer-chipstart > 0.01667 Then
+		If cpu.delaytimer > 0 Then cpu.delaytimer-=1
+		If cpu.soundtimer > 0 Then cpu.soundtimer-=1
+		chipstart = timer
+	End If
 Loop While Not MultiKey(SC_ESCAPE)

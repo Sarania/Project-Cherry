@@ -14,43 +14,43 @@ Sub decode(ByVal opc As UShort)
 		cpu.instruction = "RET"
 		Exit Sub
 	End If
-	
-	
+
+
 	If Left(opctemp,1) = "1" Then
 		cpu.instruction = "JMP"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "2" Then
 		cpu.instruction = "CALL"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "3" Then
 		cpu.instruction = "SKIPEQUAL"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "4" Then
 		cpu.instruction = "SKIPNOTEQUAL"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "5" Then
 		cpu.instruction = "SKIPEQUALREG"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "6" Then
 		cpu.instruction = "LOADKK"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "7" Then
 		cpu.instruction = "ADDKK"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "8" Then
 		If Right(opctemp,1) = "0" Then
 			cpu.instruction = "VXEQVY"
@@ -89,32 +89,32 @@ Sub decode(ByVal opc As UShort)
 			Exit sub
 		EndIf
 	End If
-	
+
 	If Left(opctemp,1) = "9" Then
 		cpu.instruction = "SKIPNOTEQUALREG"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "A" Then
 		cpu.instruction = "LOADINDEX"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "B" Then
 		cpu.instruction = "JUMPREG"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "C" Then
 		cpu.instruction = "RNDANDKK"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "D" Then
 		cpu.instruction = "DISPLAY"
 		Exit Sub
 	End If
-	
+
 	If Left(opctemp,1) = "E" Then
 		If Right(opctemp,2) = "9E" Then
 			cpu.instruction = "KEYSKIP"
@@ -125,7 +125,7 @@ Sub decode(ByVal opc As UShort)
 			Exit sub
 		EndIf
 	End If
-	
+
 	If Left(opctemp,1) = "F" Then
 		If Right(opctemp,2) = "07" Then
 			cpu.instruction = "VXDELAY"
@@ -162,48 +162,48 @@ Sub decode(ByVal opc As UShort)
 		If Right(opctemp,2) = "65" Then
 			cpu.instruction = "LOADREG"
 			Exit Sub
-		
+
 		EndIf
 	End If
 	'Start of SCHIP
-		If Right(opctemp, 2) = "CN" Then 
-			cpu.instruction = "SCROLLN"
-			Exit Sub
-		EndIf 
-		If Right(opctemp, 2) = "FB" Then 
-			cpu.instruction = "RIGHTSCR"
-			Exit Sub
-		EndIf
-		If Right(opctemp, 2) = "FC" Then 
-			cpu.instruction = "LEFTSCR" 
-			Exit Sub
-		EndIf 
-		If Right(opctemp, 2) = "FD" Then 
-			cpu.instruction = "EXCHIP"
-			Exit Sub
-		EndIf
-		If Right(opctemp, 2) = "FE" Then 
-			cpu.instruction = "DISEXT"
-			Exit Sub
-		EndIf
-		If Right(opctemp, 2) = "FF" Then 
-			cpu.instruction = "ENEXT" 
-			Exit Sub
-		EndIf
-		If Right(opctemp, 2) = "30" Then
-			cpu.instruction = "TENSPRITE"
-			Exit Sub
-		EndIf
-		If Right(opctemp, 2) = "75" Then 
-			cpu.instruction = "STORERPL"
-			Exit Sub
-		EndIf
-		If Right(opctemp, 2) = "85" Then
-			cpu.instruction = "READRPL"
-			Exit Sub
-			
-		EndIf
+	If Right(opctemp, 2) = "CN" Then
+		cpu.instruction = "SCROLLN"
+		Exit Sub
+	EndIf
+	If Right(opctemp, 2) = "FB" Then
+		cpu.instruction = "RIGHTSCR"
+		Exit Sub
+	EndIf
+	If Right(opctemp, 2) = "FC" Then
+		cpu.instruction = "LEFTSCR"
+		Exit Sub
+	EndIf
+	If Right(opctemp, 2) = "FD" Then
+		cpu.instruction = "EXCHIP"
+		Exit Sub
+	EndIf
+	If Right(opctemp, 2) = "FE" Then
+		cpu.instruction = "DISEXT"
+		Exit Sub
+	EndIf
+	If Right(opctemp, 2) = "FF" Then
+		cpu.instruction = "ENEXT"
+		Exit Sub
+	EndIf
+	If Right(opctemp, 2) = "30" Then
+		cpu.instruction = "TENSPRITE"
+		Exit Sub
+	EndIf
+	If Right(opctemp, 2) = "75" Then
+		cpu.instruction = "STORERPL"
+		Exit Sub
+	EndIf
+	If Right(opctemp, 2) = "85" Then
+		cpu.instruction = "READRPL"
+		Exit Sub
+
+	EndIf
 	cpu.instruction = "BAD DECODE"
-	
+
 
 End Sub
