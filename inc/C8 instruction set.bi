@@ -144,7 +144,7 @@ Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
 vy = cpu.opcode And &h00F0
 vy = vy Shr 4
-If cpu.v(vx) > cpu.v(vy) Then cpu.v(&Hf) = 1 Else cpu.v(&hF) = 0
+If cpu.v(vx) >= cpu.v(vy) Then cpu.v(&Hf) = 1 Else cpu.v(&hF) = 0
 cpu.v(vx) -= cpu.v(vy)
 End Sub
 
@@ -160,7 +160,7 @@ Vx = cpu.opcode and &H0F00
 Vx = vx Shr 8
 vy = cpu.opcode And &h00F0
 vy = vy Shr 4
-If cpu.v(vy) > cpu.v(vx) Then cpu.v(&Hf) = 1 Else cpu.v(&hF) = 0
+If cpu.v(vy) >= cpu.v(vx) Then cpu.v(&Hf) = 1 Else cpu.v(&hF) = 0
 cpu.v(vx) = cpu.v(vy) - cpu.v(vx)
 End Sub
 

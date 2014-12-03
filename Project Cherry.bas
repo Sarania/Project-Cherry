@@ -184,7 +184,7 @@ Sub render
 		For x As Integer = 0 To 63
 			For z As Integer = sfy To 1 Step -1
 				If cpu.display(x,y) = 1 Then
-					Line screenbuff, (x*sfx-sfx,(y*sfy-z)+10)-(x*sfx,(y*sfy-z)+10), RGB(foreR,foreG,foreB)
+					Line screenbuff, ((x*sfx-sfx),(y*sfy-z)+10)-((x*sfx),(y*sfy-z)+10), RGB(foreR,foreG,foreB)
 				Else
 					If backR <> 0 Or backG <> 0 Or backB <> 0 Then Line screenbuff, (x*sfx-sfx,y*sfy-z)-(x*sfx,y*sfy-z), RGB(backR,backG,backB)
 				End If
@@ -438,7 +438,7 @@ Do
 
 		Case Else
 			Cls
-			Print "Decore error!"
+			Print "Decoder error!"
 			Print "Opcode: " & Hex(cpu.opcode)
 			Print "Instruction: " & cpu.instruction
 			Print cpu.opcount
