@@ -4,6 +4,11 @@ Declare Sub decode(ByVal opc As UShort)
 
 Sub decode(ByVal opc As UShort) ' I realize this is a mess, with EXIT SUB everywhere and what not, but this was the most readable way to do this
 	Dim As String opctemp = UCase(Hex(opc))
+	
+	If opctemp = "F800" Then
+		cpu.instruction = "HIRES"
+		Exit sub
+	EndIf
 
 	If opctemp = "E0" Then
 		cpu.instruction = "CLS"
@@ -15,7 +20,7 @@ Sub decode(ByVal opc As UShort) ' I realize this is a mess, with EXIT SUB everyw
 		cpu.instruction = "RET"
 		Exit Sub
 	End If
-
+	
 
 	If Left(opctemp,1) = "1" Then
 		cpu.instruction = "JMP"

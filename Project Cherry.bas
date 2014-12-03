@@ -13,20 +13,21 @@ Type Chip8
 	opcode As UShort 'current instruction in binary
 	opcodePTR As UShort Pointer 'points to the opcode, had to do some weird magic to extract 2 bytes
 	memory(0 To 4095) As UByte 'RAM
-	V(0 To 15) As UByte 'Registers
+	V(0 To 15) As UByte 'Registers V0-VF
 	stack(0 To 15) As UShort 'The stack
 	sp As UShort 'Stack pointer
 	Index As UShort 'Generally holds addresses, it's a register
 	PC As UShort 'Program counter
-	display(0 To 63, 0 To 31) As UByte 'Monochrome display
 	delayTimer As UByte 'counts to 0 at 60hz
 	soundTimer As UByte 'counts to 0 at 60hz, plays a beep when it hits 0
 	key(0 To 15) As UByte 'Hex keypad
 	hp48(0 To 7) As UByte 'SCHIP registers
+	xres As UByte = 63 'display X
+	yres As UByte = 31'display y
 End Type
 
-
 Dim Shared As chip8 CPU 'main cpu
+Dim Shared display(0 To cpu.xres, 0 To cpu.yres) As UByte 'Monochrome display
 Dim Shared As fb.image Ptr screenbuff 'buffer for screen
 Dim Shared As Double start, chipstart 'start is used for opcode timing, chipstart for chip8 timers
 Dim Shared As UInteger VX, VY, KK 'Chip 8 vars
@@ -188,20 +189,20 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 
 End Sub
 Sub render
-	screenbuff = ImageCreate(screenx,screeny,RGB(0,0,0)) 'Create a buffer to draw to. Faster than drawing to screen
-	For y As Integer = 0 To 31
-		For x As Integer = 0 To 63
-			For z As Integer = sfy To 1 Step -1 'We scale by drawing a giant pixel with lines, Z number of times
-				If cpu.display(x,y) = 1 Then
-					Line screenbuff, ((x*sfx-sfx),(y*sfy-z)+10)-((x*sfx),(y*sfy-z)+10), RGB(foreR,foreG,foreB)
-				Else
-					If backR <> 0 Or backG <> 0 Or backB <> 0 Then Line screenbuff, (x*sfx-sfx,y*sfy-z)-(x*sfx,y*sfy-z), RGB(backR,backG,backB) 'If background color is not black, we must draw the black pixels too
-				End If
+	screenbuff = ImageCreate(screenx,screeny,RGB(backR,backG,backB))
+	For y As UInteger = 1 To cpu.yres+1
+		For x As UInteger = 1 To cpu.xres+1
+			If display(x,y) = 1 Then
+				'if y = cpu.yres+1 Then foreR = 0 Else foreR = 255
+			For z As Integer = sfy To 1 Step -1
+				Line screenbuff, (x*sfx-(sfx/2)+IIf(y=cpu.yres+1,sfx,0), (y*sfy-z))-(x*sfx+(sfx/2)+IIf(y=cpu.yres+1,sfx,0),(y*sfy-z)), RGB(foreR,foreG,foreB)
 			Next
+			End if
 		Next
 	Next
-	Put (sfx/2,sfy/2),screenbuff,PSet 'Place image buffer on screen
-	ImageDestroy(screenbuff)
+	Put (0,0),screenbuff,pset
+
+ImageDestroy(screenbuff)
 End Sub
 
 
@@ -217,9 +218,9 @@ Sub initcpu 'initialize the CPU to power on state
 	CPU.sp = 0
 	CPU.index = 0
 	CPU.PC = &h200
-	For y As Integer = 0 To 31
-		For x As Integer = 0 To 63
-			cpu.display(x,y) = 0
+	For y As Integer = 0 To cpu.yres
+		For x As Integer = 0 To cpu.xres
+			display(x,y) = 0
 		Next
 	Next
 	CPU.delaytimer = 0
@@ -280,8 +281,8 @@ End Sub
 Randomize Timer 'Feed the random number generator the timer as a seed
 loadini
 ScreenRes screenx,screeny,32
-sfx = screenx/64 'compute the scale factor for X
-sfy = screeny/32 ' and Y
+sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
+sfy = screeny/(cpu.yres+1) ' and Y
 initcpu
 loadprog
 Cls
@@ -305,6 +306,9 @@ Do
 	keycheck 'check for key presses
 	extract ' pull VX and VY out of cpu.opcode
 	Select Case cpu.instruction
+		Case "HIRES"
+			INS_HIRES
+		
 		Case "CLS"
 			INS_CLS
 

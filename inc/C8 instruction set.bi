@@ -33,10 +33,21 @@ Declare Sub INS_BCDSTORE 'FX33
 Declare Sub INS_STOREREG 'FX55
 Declare Sub INS_LOADREG 'FX65
 Declare Sub INS_SCROLLN '00CN
+Declare Sub INS_HIRES 'F800
+
+Sub INS_HIRES 'F800
+	cpu.xres = 64
+	cpu.yres = 64
+	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
+	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
+   sfy = screeny/(cpu.yres+1) ' and Y
+   cpu.pc = &h260
+   
+End Sub
 Sub INS_CLS '00E0
-	For y As Integer = 0 To 31
-		For x As Integer = 0 To 63
-			cpu.display(x,y) = 0
+	For y As Integer = 0 To cpu.yres
+		For x As Integer = 0 To cpu.xres
+			display(x,y) = 0
 		Next
 	Next
 	cpu.drawflag=1
@@ -154,11 +165,13 @@ Sub INS_DISPLAY 'DXYN
 		p = cpu.memory(cpu.index+y)
 		For x As Integer = 0 To 7
 			If (p And (&h80 Shr x)) <> 0 Then
-				If cpu.display(cpu.v(vx)+x, cpu.v(vy)+y) = 1 then
+				If display((cpu.v(vx)+x) And cpu.xres, (cpu.v(vy)+y+1) And cpu.yres) = 1 then
 					cpu.v(&hf) = 1
 				EndIf
-				cpu.display(cpu.v(vx)+x,cpu.v(vy)+y) Xor = 1
+				
+				display((cpu.v(vx)+x) And cpu.xres,(cpu.v(vy)+y+1) And cpu.yres) Xor = 1
 			EndIf
+			skipit:
 		Next
 	Next
 	cpu.drawflag=1
