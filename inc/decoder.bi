@@ -3,12 +3,7 @@
 Declare Sub decode(ByVal opc As UShort)
 
 Sub decode(ByVal opc As UShort) ' I realize this is a mess, with EXIT SUB everywhere and what not, but this was the most readable way to do this
-	Dim As String opctemp = UCase(Hex(opc))	
-	If Len(opctemp) < 4 And InStr(opctemp,"C") Then
-		Open ExePath & "/ophist.txt" For Append As #1
-		Print #1, opctemp
-	EndIf
-	
+	Dim As String opctemp = UCase(Hex(opc))		
 If LEFT(opctemp, 1) = "C" And Len(opctemp) < 4 Then
 		cpu.instruction = "SCROLLN"
 		Exit Sub
