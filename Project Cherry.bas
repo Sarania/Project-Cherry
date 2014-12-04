@@ -4,7 +4,7 @@
 Using FB
 #Include Once "file.bi"
 
-Dim Shared As UByte debug = 1 ' 1 to show debug, 0 to not show
+Dim Shared As UByte debug = 0 ' 1 to show debug, 0 to not show
 
 Type Chip8
 	drawflag As UByte 'is set to 1 when screen needs updated
@@ -35,6 +35,7 @@ Dim Shared As UInteger screenx, screeny, ops 'screen size, and ops per second
 Dim Shared As UInteger foreR, foreG, foreB, backR, backG, backB 'screen colors
 Dim Shared As UInteger sfx, sfy 'scale factor for display
 Dim Shared As Single version = 0.7 'version
+Dim Shared As UByte dosave, doload
 Declare Sub keycheck 'check keys, this must be defined here because the following includes depend on it
 #Include Once "inc/c8 instruction set.bi" 'these must go here because depend on cpu type
 #Include Once "inc/decoder.bi" 'same
@@ -67,6 +68,87 @@ Declare Sub render 'render the display
 Declare Sub loadini 'load teh ini
 Declare Sub about 'project information
 Declare Sub extract 'extract VX and VY from cpu.opcode
+Declare Sub saveState
+Declare Sub loadState
+
+Sub saveState
+	Dim As UByte f = FreeFile
+	Open ExePath & "/cherry.state" For Output As #f
+	Print #f, cpu.drawflag
+	Print #f, cpu.opcount
+	Print #f, cpu.instruction
+	Print #f, cpu.opcode
+	Print #f, *cpu.opcodePTR
+	For i As Integer = 0 To 15
+		Print #f, cpu.v(i)
+	Next
+	For i As Integer = 0 To 15
+		Print #f, cpu.stack(i)
+	Next
+	Print #f, cpu.sp
+	Print #f, cpu.index
+	Print #f, cpu.PC
+	Print #f, cpu.delayTimer
+	Print #f, cpu.soundTimer
+	Print #f, cpu.xres
+	Print #f, cpu.yres
+   Print #f, start
+   Print #f, ops
+   Print #f, sfx
+   Print #f, sfy
+   For y As Integer = 0 To cpu.yres
+   	For x As Integer = 0 To cpu.xres
+   		Print #f, display(x,y)
+   	Next
+   Next
+   Close #f
+   f = FreeFile
+   Open ExePath & "/cherry.ram" For Binary As #f
+   Put #f, 1, cpu.memory()
+   Close #f
+   start = Timer
+	cpu.opcount = 0
+End Sub
+
+Sub loadstate
+	initcpu
+	Dim As UByte f = FreeFile
+	Open ExePath & "/cherry.state" For Input As #f
+	Input #f, cpu.drawflag
+	Input #f, cpu.opcount
+	Input #f, cpu.instruction
+	Input #f, cpu.opcode
+	Input #f, *cpu.opcodePTR
+	For i As Integer = 0 To 15
+		Input #f, cpu.v(i)
+	Next
+	For i As Integer = 0 To 15
+		Input #f, cpu.stack(i)
+	Next
+	Input #f, cpu.sp
+	Input #f, cpu.Index
+	Input #f, cpu.PC
+	Input #f, cpu.delayTimer
+	Input #f, cpu.soundTimer
+	Input #f, cpu.xres
+	Input #f, cpu.yres
+	Input #f, start
+	Input #f, ops
+	Input #f, sfx
+	Input #f, sfy
+	For y As Integer = 0 To cpu.yres
+   	For x As Integer = 0 To cpu.xres
+   		input #f, display(x,y)
+   	Next
+   Next
+	Close #f
+	f = FreeFile
+	Open ExePath & "/cherry.ram" For Binary As #f
+	Get #f, 1, cpu.memory()
+	Close #f
+	start = Timer
+	cpu.opcount = 0
+End Sub
 
 Sub extract 'extract VX and VY from cpu.opcode
 	Vx = cpu.opcode And &H0F00
@@ -186,6 +268,30 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 			Sleep 15
 		Wend
 	EndIf
+	
+	If MultiKey(SC_F3) Then
+	Beep
+	dosave = 1
+	Draw String (5,5), "State saved successfully!", RGB(128,0,255)
+	Sleep 1000,1
+	While MultiKey(SC_F3)
+		Sleep 15
+	Wend
+EndIf
+
+If MultiKey(SC_F5) Then
+	Beep
+	If Not FileExists(ExePath & "/cherry.state") Or Not FileExists(ExePath & "/cherry.ram") Then 
+		Draw String(5,5), "No save state found!", RGB(255,0,0)
+	Else
+		doload = 1
+		Draw String (5,5), "State loaded successfully!", RGB(128,0,255)
+	EndIf
+	Sleep 1000,1
+	While MultiKey(SC_F5)
+		Sleep 15
+	Wend
+	End if
 
 End Sub
 Sub render
@@ -461,5 +567,8 @@ Do
 		Print "Sound timer: " & cpu.soundTimer
 		Print "Ops per second: " & ops
 	End If
+
+If dosave = 1 Then saveState: dosave = 0: End if
+If doload = 1 Then loadstate: doload = 0: End If
 
 Loop

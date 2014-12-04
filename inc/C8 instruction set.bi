@@ -165,13 +165,12 @@ Sub INS_DISPLAY 'DXYN
 		p = cpu.memory(cpu.index+y)
 		For x As Integer = 0 To 7
 			If (p And (&h80 Shr x)) <> 0 Then
-				If display((cpu.v(vx)+x) And cpu.xres, (cpu.v(vy)+y+1) And cpu.yres) = 1 then
+				If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y+1) Mod (cpu.yres+1)) = 1 then
 					cpu.v(&hf) = 1
 				EndIf
 				
-				display((cpu.v(vx)+x) And cpu.xres,(cpu.v(vy)+y+1) And cpu.yres) Xor = 1
+				display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1
 			EndIf
-			skipit:
 		Next
 	Next
 	cpu.drawflag=1
