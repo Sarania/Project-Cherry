@@ -27,8 +27,17 @@ Type Chip8
 	yres As UByte = 31'display y
 End Type
 
+Type controller
+	up As UByte
+	down As UByte
+	Left As UByte
+	Right As ubyte
+End Type
+
+Dim Shared As controller c
 Dim Shared As chip8 CPU 'main cpu
 Dim Shared display(0 To cpu.xres, 0 To cpu.yres) As UByte 'Monochrome display
+Dim Shared dispcolor(1 To cpu.yres+1) As integer
 Dim Shared As fb.image Ptr screenbuff 'buffer for screen
 Dim Shared As fb.image Ptr debugbox 'debug box
 Dim Shared As Double start, chipstart 'start is used for opcode timing, chipstart for chip8 timers
@@ -38,9 +47,12 @@ Dim Shared As UInteger foreR, foreG, foreB, backR, backG, backB 'screen colors
 Dim Shared As UInteger sfx, sfy 'scale factor for display
 Dim Shared As Single version = 0.7 'version
 Dim Shared As UByte dosave, doload
+Dim Shared As UByte colorlines, aspect
+Dim Shared As UByte layout = 0
 Declare Sub keycheck 'check keys, this must be defined here because the following includes depend on it
 Declare Sub CAE 'cleanup and exit
 Declare Sub render 'render the display
+Declare Sub colorit
 #Include Once "inc/c8 instruction set.bi" 'these must go here because depend on cpu type
 #Include Once "inc/decoder.bi" 'same
 
@@ -88,7 +100,21 @@ Declare Sub loadini 'load teh ini
 Declare Sub about 'project information
 Declare Sub extract 'extract VX and VY from cpu.opcode
 Declare Sub saveState
-Declare Sub loadState
+Declare Sub loadstate
+
+
+Sub colorit
+	ReDim Preserve dispcolor(1 To cpu.yres+1)
+		Dim As UByte r, g, b
+		For y As Integer = 1 To cpu.yres+1
+			recolor:
+			r = (Rnd * 255) 
+			g = (Rnd * 255) 
+			b = (Rnd * 255)
+			If r+g+b < 255 Then GoTo recolor
+			dispcolor(y) = RGB(r,g,b)
+		Next
+End Sub
 
 Sub saveState
 	Dim As UByte f = FreeFile
@@ -228,6 +254,8 @@ Sub loadini
 		Print #f, 0 'Background Red
 		Print #f, 0 'Background Green
 		Print #f, 0 'Background Blue
+		Print #f, 0 '1 for random color lines
+		Print #f, 0' 1 for aspect correct scaling
 		Close #f
 	EndIf
 	Open ExePath & "\cherry.ini" For Input As #f
@@ -240,28 +268,64 @@ Sub loadini
 	Input #f, backR
 	Input #f, backG
 	Input #f, backB
+	Input #f, Colorlines
+	input #f, aspect
 	Close #f
 End Sub
 
 
 
 Sub keycheck 'Check for keypresses, and pass to the emulated CPU
-	If MultiKey(SC_1) Then cpu.key(1) = 1 Else cpu.key(1) = 0
-	If MultiKey(SC_2) Then cpu.key(2) = 1 Else cpu.key(2) = 0
-	If MultiKey(SC_3) Then cpu.key(3) = 1 Else cpu.key(3) = 0
-	If MultiKey(SC_4) Then cpu.key(12) = 1 Else cpu.key(12) = 0
-	If MultiKey(sc_r) Then cpu.key(13) = 1 Else cpu.key(13) = 0
-	If MultiKey(sc_a) Then cpu.key(7) = 1 Else cpu.key(7) = 0
-	If MultiKey(sc_s) Then cpu.key(8) = 1 Else cpu.key(8) = 0
-	If MultiKey(SC_d) Then cpu.key(9) = 1 Else cpu.key(9) = 0
-	If MultiKey(sc_f) Then cpu.key(14) = 1 Else cpu.key(14) = 0
-	If MultiKey(SC_q) Then cpu.key(4) = 1 Else cpu.key(4) = 0
-	If MultiKey(SC_w) Then cpu.key(5) = 1 Else cpu.key(5) = 0
-	If MultiKey(SC_e) Then cpu.key(6) = 1 Else cpu.key(6) = 0
-	If MultiKey(SC_z) Then cpu.key(10) = 1 Else cpu.key(10) = 0
-	If MultiKey(SC_x) Then cpu.key(0) = 1 Else cpu.key(0) = 0
-	If MultiKey(SC_c) Then cpu.key(11) = 1 Else cpu.key(11) = 0
-	If MultiKey(SC_v) Then cpu.key(15) = 1 Else cpu.key(15) = 0
+	For i As Integer = 1 To 15
+		cpu.key(i) = 0
+	Next
+	If MultiKey(SC_UP) Or MultiKey(SC_W) Then c.up = 1 Else c.up = 0
+	If MultiKey(SC_DOWN) Or MultiKey(SC_S) Then c.down = 1 Else c.down = 0
+	If MultiKey(SC_LEFT) Or MultiKey(SC_A) Then c.left = 1 Else c.left = 0
+	If MultiKey(SC_RIGHT) Or MultiKey(SC_D) Then c.right = 1 Else c.right = 0
+	If layout = 0 Then
+	If MultiKey(SC_1) Then cpu.key(1) = 1
+	If MultiKey(SC_2) Then cpu.key(2) = 1
+	If MultiKey(SC_3) Then cpu.key(3) = 1
+	If MultiKey(SC_4) Then cpu.key(12) = 1
+	If MultiKey(sc_r) Then cpu.key(13) = 1
+	If MultiKey(sc_a) Then cpu.key(7) = 1
+	If MultiKey(sc_s) Then cpu.key(8) = 1
+	If MultiKey(SC_d) Then cpu.key(9) = 1
+	If MultiKey(sc_f) Then cpu.key(14) = 1
+	If MultiKey(SC_q) Then cpu.key(4) = 1
+	If MultiKey(SC_w) Then cpu.key(5) = 1
+	If MultiKey(SC_e) Then cpu.key(6) = 1
+	If MultiKey(SC_z) Then cpu.key(10) = 1
+	If MultiKey(SC_x) Then cpu.key(0) = 1
+	If MultiKey(SC_c) Then cpu.key(11) = 1
+	If MultiKey(SC_v) Then cpu.key(15) = 1
+	End If
+	If layout = 1 Then
+		If c.left Then cpu.key(7) = 1
+		If c.right Then cpu.key(8) = 1
+		If c.up Then cpu.key(3) = 1
+		If c.down Then cpu.key(6) = 1
+	EndIf
+	If layout = 2 Then
+		If c.left Then cpu.key(5) = 1
+		If c.right Then cpu.key(6) = 1
+		If c.up Then cpu.key(4) = 1
+		If c.down Then cpu.key(7) = 1
+	EndIf
+	If layout = 3 Then
+		If c.left Then cpu.key(4) = 1
+		If c.right Then cpu.key(6) = 1 
+	EndIf
+	If layout = 4 Then
+		If c.up Or c.left Then cpu.key(1) = 1 
+		If c.down Or c.right Then cpu.key(4) = 1
+	EndIf
+	If layout = 5 Then
+		If c.left Then cpu.key(4) = 1
+		If c.right Then cpu.key(6) = 1 
+		If c.up Then cpu.key(5) = 1
+	EndIf
 	If MultiKey(SC_ESCAPE) Then
 		CAE
 	EndIf
@@ -322,12 +386,14 @@ EndIf
 
 End Sub
 Sub render
+	Dim As Single clr = rgb(foreR,foreG,foreB)
 	screenbuff = ImageCreate(screenx,screeny,RGB(backR,backG,backB))
 	For y As UInteger = 1 To cpu.yres+1
+		If colorlines = 1 Then clr = dispcolor(y)
 		For x As UInteger = 1 To cpu.xres+1
 			If display(x,y) = 1 Then
 			For z As Integer = sfy To 1 Step -1
-				Line screenbuff, (x*sfx-(sfx/2)+IIf(y=cpu.yres+1,sfx,0), (y*sfy-z))-(x*sfx+(sfx/2)+IIf(y=cpu.yres+1,sfx,0),(y*sfy-z)), RGB(foreR,foreG,foreB)
+				Line screenbuff, (x*sfx-(sfx/2)+IIf(y=cpu.yres+1,sfx,0), (y*sfy-z))-(x*sfx+(sfx/2)+IIf(y=cpu.yres+1,sfx,0),(y*sfy-z)), clr
 			Next
 			End if
 		Next
@@ -393,7 +459,14 @@ Sub loadprog 'Load a ROM
 		EndIf
 		shpname = shpname & onechr
 	Next
-
+   If UCase(Left(shpname,6)) = "BLINKY" Then layout = 1
+   If UCase(Left(shpname,6)) = "TETRIS" Then layout = 2
+   If UCase(Left(shpname,8)) = "BREAKOUT" Then layout = 3
+   If UCase(Left(shpname,5)) = "BRICK" Then layout = 3
+   If UCase(Left(shpname,4)) = "PONG" Then layout = 4
+   If UCase(Left(shpname,14)) = "SPACE INVADERS" Then layout = 5
+   
+   
 	WindowTitle "Project Cherry: " & shpname ' set window title
 	Dim As Integer f = FreeFile
 	Open progname For Binary As #f
@@ -415,6 +488,7 @@ End Sub
 Randomize Timer 'Feed the random number generator the timer as a seed
 loadini
 ScreenRes screenx,screeny,32
+If colorlines Then colorit
 sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
 sfy = screeny/(cpu.yres+1) ' and Y
 initcpu
@@ -602,7 +676,9 @@ Do
 	   ImageDestroy(debugbox)
 	End If
 
+
 If dosave = 1 Then saveState: dosave = 0: cpu.drawflag = 1: End if
 If doload = 1 Then loadstate: doload = 0: cpu.drawflag = 1: End If
 
+If InKey = Chr(255) + "k" Then CAE
 Loop

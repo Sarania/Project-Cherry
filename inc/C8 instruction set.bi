@@ -43,7 +43,7 @@ Sub INS_HIRES 'F800
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
    sfy = screeny/(cpu.yres+1) ' and Y
    cpu.pc = &h2c0
-   
+   If colorlines Then colorit
 End Sub
 Sub INS_CLS '00E0
 	For y As Integer = 0 To cpu.yres
@@ -94,7 +94,7 @@ End Sub
 
 Sub INS_ADDKK '7XKK
 	KK = cpu.opcode And &h00FF
-	cpu.v(vx) = cpu.v(vx)+kk
+	cpu.v(vx)+= kk
 End Sub
 
 Sub INS_VXEQVY '8XY0
@@ -236,14 +236,14 @@ Sub INS_STOREREG 'FX55
 	For I As Integer = 0 To vx
 		cpu.memory(cpu.index + i) = cpu.v(i)
 	Next
-	cpu.index+= vx+1
+	'cpu.index+= vx+1
 End Sub
 
 Sub INS_LOADREG 'FX65
 	For i As Integer = 0 To vx
 		cpu.v(i) = cpu.memory(cpu.index+i)
 	Next
-	cpu.index+= vx+1
+	'cpu.index+= vx+1
 End Sub
 Sub INS_SCROLLN '00CN
 Dim As UByte N
@@ -293,7 +293,7 @@ Sub INS_DISEXT '00FE
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
    sfy = screeny/(cpu.yres+1) ' and Y
-
+   If colorlines Then colorit
 End Sub
 Sub INS_ENEXT  '00FF
 	cpu.mode = "SCHIP"
@@ -302,9 +302,11 @@ Sub INS_ENEXT  '00FF
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
    sfy = screeny/(cpu.yres+1) ' and Y
+   If colorlines Then colorit
 End Sub
 Sub INS_TENSPRITE 'FX30
-	cpu.index = (cpu.v(vx)*10)
+	cpu.index = (cpu.v(vx)*10)+80
+	cpu.drawflag=1
 End Sub
 
 Sub INS_STORERPL 'FX75
