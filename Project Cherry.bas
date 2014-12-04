@@ -7,6 +7,7 @@ Using FB
 Dim Shared As UByte debug = 1 ' 1 to show debug, 0 to not show
 
 Type Chip8
+	mode As String = "CHIP-8"
 	drawflag As UByte 'is set to 1 when screen needs updated
 	opcount As ULongInt 'total number of ops. Reset when ops per second is changed
 	instruction As String 'current instruction in string form
@@ -39,6 +40,7 @@ Dim Shared As Single version = 0.7 'version
 Dim Shared As UByte dosave, doload
 Declare Sub keycheck 'check keys, this must be defined here because the following includes depend on it
 Declare Sub CAE 'cleanup and exit
+Declare Sub render 'render the display
 #Include Once "inc/c8 instruction set.bi" 'these must go here because depend on cpu type
 #Include Once "inc/decoder.bi" 'same
 
@@ -82,7 +84,6 @@ Dim Shared As UByte Sfont(0 To 159) => _ 'SCHIP font set
 
 Declare Sub initcpu 'initialize CPU
 Declare Sub loadprog 'load ROM to memory
-Declare Sub render 'render the display
 Declare Sub loadini 'load teh ini
 Declare Sub about 'project information
 Declare Sub extract 'extract VX and VY from cpu.opcode
@@ -360,8 +361,8 @@ Sub initcpu 'initialize the CPU to power on state
 	For i As Integer = 0 To 79
 		cpu.memory(i) = font(i)
 	Next
-	For i As Integer = 80 To 159
-		cpu.memory(i) = Sfont(i)
+	For i As Integer = 0 To 159
+		cpu.memory(i+80) = Sfont(i)
 	Next
 End Sub
 
@@ -587,15 +588,16 @@ Do
 	End If
 
 	If debug = 1 Then 'print debug infos
-		debugbox = ImageCreate(254,64,RGB(128,0,128))
-		Line debugbox, (1,1)-(252,62),RGB(128,0,128), BF
-		Line debugbox, (1,1)-(252,62),RGB(255,255,255),B
+		debugbox = ImageCreate(254,74,RGB(128,0,128))
+		Line debugbox, (1,1)-(252,72),RGB(128,0,128), BF
+		Line debugbox, (1,1)-(252,72),RGB(255,255,255),B
 		Draw String debugbox, (2,2), "Instruction: " & cpu.instruction 
 		Draw String debugbox, (2, 12), "1-2-3-4-q-w-e-r-a-s-d-f-z-x-c-v"
 		Draw String debugbox, (2, 22), cpu.key(0) & "_" & cpu.key(1) & "_" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
 	   Draw String debugbox, (2, 32), "Delay timer: " & cpu.delayTimer
 	   Draw String debugbox, (2, 42), "Sound timer: " & cpu.soundTimer
 	   Draw String debugbox, (2, 52), "Ops per second: " & ops
+	   Draw String debugbox, (2, 62), "Emulator mode: " & cpu.mode
       put (0,0),debugBox, pset
 	   ImageDestroy(debugbox)
 	End If

@@ -36,6 +36,7 @@ Declare Sub INS_SCROLLN '00CN
 Declare Sub INS_HIRES 'F800
 
 Sub INS_HIRES 'F800
+	cpu.mode = "CHIP-8 HIRES"
 	cpu.xres = 63
 	cpu.yres = 63
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
@@ -245,21 +246,48 @@ Sub INS_LOADREG 'FX65
 	cpu.index+= vx+1
 End Sub
 Sub INS_SCROLLN '00CN
-
+Dim As UByte N
+n = cpu.opcode And &h000F
+For i As Integer = 1 To N
+	For y As Integer = 63 To 1 Step -1
+		For x As Integer = 0 To 127
+			display(x,y) = display (x,y-1)
+		Next
+	Next
+	cpu.drawflag = 1
+	render
+Next
 End Sub
 
 Sub INS_RIGHTSCR '00FB
-
+For y As Integer = 0 To cpu.yres
+	For x As Integer = cpu.xres To 4 Step -1
+		display(x,y) = display (x-4,y)
+	Next
+	For x As Integer = 3 to 0 Step -1
+		display(x,y) = 0
+	Next
+Next
+cpu.drawflag = 1
 End Sub
 
 Sub INS_LEFTSCR '00FC
-
+For y As Integer = 0 To cpu.yres
+	For x As Integer = 0 To cpu.xres-4
+		display(x,y) = display (x+4,y)
+	Next
+	For x As Integer = cpu.xres-3 To cpu.xres
+		display(x,y) = 0
+	Next
+Next
+cpu.drawflag = 1
 End Sub
 
 Sub INS_EXCHIP '00FD
  CAE
 End Sub
 Sub INS_DISEXT '00FE
+	cpu.mode = "CHIP-8"
 	cpu.xres = 63
 	cpu.yres = 31
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
@@ -268,7 +296,7 @@ Sub INS_DISEXT '00FE
 
 End Sub
 Sub INS_ENEXT  '00FF
-	beep
+	cpu.mode = "SCHIP"
 	cpu.xres = 127
 	cpu.yres = 63
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
@@ -278,10 +306,10 @@ End Sub
 Sub INS_TENSPRITE 'FX30
 	cpu.index = (cpu.v(vx)*10)
 End Sub
+
 Sub INS_STORERPL 'FX75
 For i As Integer = 0 To vx
 	cpu.hp48(i) = cpu.V(i)
-	
 Next
 End Sub
 Sub INS_READRPL 'FX85
