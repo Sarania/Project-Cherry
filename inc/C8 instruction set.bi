@@ -41,7 +41,7 @@ Sub INS_HIRES 'F800
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
    sfy = screeny/(cpu.yres+1) ' and Y
-   cpu.pc = &h260
+   cpu.pc = &h2c0
    
 End Sub
 Sub INS_CLS '00E0
@@ -269,7 +269,6 @@ Sub INS_TENSPRITE 'FX30
 
 End Sub
 Sub INS_STORERPL 'FX75
-	
 For i As Integer = 0 To vx
 	cpu.hp48(i) = cpu.V(i)
 	
