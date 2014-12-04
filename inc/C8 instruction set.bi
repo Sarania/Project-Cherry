@@ -257,7 +257,7 @@ Sub INS_LEFTSCR '00FC
 End Sub
 
 Sub INS_EXCHIP '00FD
- 
+ CAE
 End Sub
 Sub INS_DISEXT '00FE
 	cpu.xres = 63
@@ -276,7 +276,7 @@ Sub INS_ENEXT  '00FF
    sfy = screeny/(cpu.yres+1) ' and Y
 End Sub
 Sub INS_TENSPRITE 'FX30
-
+	cpu.index = (cpu.v(vx)*10)
 End Sub
 Sub INS_STORERPL 'FX75
 For i As Integer = 0 To vx
