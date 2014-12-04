@@ -4,7 +4,7 @@
 Using FB
 #Include Once "file.bi"
 
-Dim Shared As UByte debug = 0 ' 1 to show debug, 0 to not show
+Dim Shared As UByte debug = 1 ' 1 to show debug, 0 to not show
 
 Type Chip8
 	drawflag As UByte 'is set to 1 when screen needs updated
@@ -29,6 +29,7 @@ End Type
 Dim Shared As chip8 CPU 'main cpu
 Dim Shared display(0 To cpu.xres, 0 To cpu.yres) As UByte 'Monochrome display
 Dim Shared As fb.image Ptr screenbuff 'buffer for screen
+Dim Shared As fb.image Ptr debugbox 'debug box
 Dim Shared As Double start, chipstart 'start is used for opcode timing, chipstart for chip8 timers
 Dim Shared As UInteger VX, VY, KK 'Chip 8 vars
 Dim Shared As UInteger screenx, screeny, ops 'screen size, and ops per second
@@ -308,7 +309,15 @@ If MultiKey(SC_F5) Then
 	While MultiKey(SC_F5)
 		Sleep 15
 	Wend
-	End if
+End If
+
+If MultiKey(sc_tilde) Then
+	If debug = 1 Then debug = 0 Else debug = 1
+	cpu.drawflag = 1
+	While MultiKey(SC_TILDE)
+		Sleep 15
+	Wend
+EndIf
 
 End Sub
 Sub render
@@ -316,15 +325,13 @@ Sub render
 	For y As UInteger = 1 To cpu.yres+1
 		For x As UInteger = 1 To cpu.xres+1
 			If display(x,y) = 1 Then
-				'if y = cpu.yres+1 Then foreR = 0 Else foreR = 255
 			For z As Integer = sfy To 1 Step -1
 				Line screenbuff, (x*sfx-(sfx/2)+IIf(y=cpu.yres+1,sfx,0), (y*sfy-z))-(x*sfx+(sfx/2)+IIf(y=cpu.yres+1,sfx,0),(y*sfy-z)), RGB(foreR,foreG,foreB)
 			Next
 			End if
 		Next
 	Next
-	Put (0,0),screenbuff,pset
-
+	Put (0,0),screenbuff,PSet
 ImageDestroy(screenbuff)
 End Sub
 
@@ -580,15 +587,20 @@ Do
 	End If
 
 	If debug = 1 Then 'print debug infos
-		Locate 1,1: Print cpu.instruction & "          "
-		Print "1-2-3-4-q-w-e-r-a-s-d-f-z-x-c-v"
-		Print cpu.key(0) & "_" & cpu.key(1) & "_" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
-		Print "Delay timer: " & cpu.delayTimer
-		Print "Sound timer: " & cpu.soundTimer
-		Print "Ops per second: " & ops
+		debugbox = ImageCreate(254,64,RGB(128,0,128))
+		Line debugbox, (1,1)-(252,62),RGB(128,0,128), BF
+		Line debugbox, (1,1)-(252,62),RGB(255,255,255),B
+		Draw String debugbox, (2,2), "Instruction: " & cpu.instruction 
+		Draw String debugbox, (2, 12), "1-2-3-4-q-w-e-r-a-s-d-f-z-x-c-v"
+		Draw String debugbox, (2, 22), cpu.key(0) & "_" & cpu.key(1) & "_" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
+	   Draw String debugbox, (2, 32), "Delay timer: " & cpu.delayTimer
+	   Draw String debugbox, (2, 42), "Sound timer: " & cpu.soundTimer
+	   Draw String debugbox, (2, 52), "Ops per second: " & ops
+      put (0,0),debugBox, pset
+	   ImageDestroy(debugbox)
 	End If
 
-If dosave = 1 Then saveState: dosave = 0: End if
-If doload = 1 Then loadstate: doload = 0: End If
+If dosave = 1 Then saveState: dosave = 0: cpu.drawflag = 1: End if
+If doload = 1 Then loadstate: doload = 0: cpu.drawflag = 1: End If
 
 Loop
