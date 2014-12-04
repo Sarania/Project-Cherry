@@ -38,6 +38,7 @@ Dim Shared As UInteger sfx, sfy 'scale factor for display
 Dim Shared As Single version = 0.7 'version
 Dim Shared As UByte dosave, doload
 Declare Sub keycheck 'check keys, this must be defined here because the following includes depend on it
+Declare Sub CAE 'cleanup and exit
 #Include Once "inc/c8 instruction set.bi" 'these must go here because depend on cpu type
 #Include Once "inc/decoder.bi" 'same
 
@@ -81,7 +82,6 @@ Dim Shared As UByte Sfont(0 To 159) => _ 'SCHIP font set
 
 Declare Sub initcpu 'initialize CPU
 Declare Sub loadprog 'load ROM to memory
-Declare Sub CAE 'cleanup and exit
 Declare Sub render 'render the display
 Declare Sub loadini 'load teh ini
 Declare Sub about 'project information
