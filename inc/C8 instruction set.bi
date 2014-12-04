@@ -41,9 +41,9 @@ Sub INS_HIRES 'F800
 	cpu.yres = 63
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
-   sfy = screeny/(cpu.yres+1) ' and Y
-   cpu.pc = &h2c0
-   If colorlines Then colorit
+	sfy = screeny/(cpu.yres+1) ' and Y
+	cpu.pc = &h2c0
+	If colorlines Then colorit
 End Sub
 Sub INS_CLS '00E0
 	For y As Integer = 0 To cpu.yres
@@ -159,21 +159,43 @@ End Sub
 Sub INS_DISPLAY 'DXYN
 	Dim n As UShort
 	Dim p As UShort
+	Dim p2 As UShort
+	Dim q As UByte = 0
+	Dim ppoint As UShort Pointer
 	n = cpu.opcode And &h000F
 	cpu.v(&hf) = 0
+	If n = 0 Then n = 16
+	If n < 16 Or cpu.mode = "CHIP-8" Then ' normal sprite
+		For y As Integer = 0 To n-1
+			p = cpu.memory(cpu.index+y)
+			For x As Integer = 0 To 7
+				If (p And (&h80 Shr x)) <> 0 Then
+					If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y+1) Mod (cpu.yres+1)) = 1 then
+						cpu.v(&hf) = 1
+					EndIf
 
-	For y As Integer = 0 To n-1
-		p = cpu.memory(cpu.index+y)
-		For x As Integer = 0 To 7
-			If (p And (&h80 Shr x)) <> 0 Then
-				If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y+1) Mod (cpu.yres+1)) = 1 then
-					cpu.v(&hf) = 1
+					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1
 				EndIf
-				
-				display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1
-			EndIf
+			Next
 		Next
-	Next
+	End If
+
+	If n = 16 And cpu.mode <> "CHIP-8" Then '16x16 sprite. More complicated. This took forever to figure out!
+		For y As Integer = 0 To 15
+			p = cpu.memory(cpu.index+q)
+			p2 = cpu.memory(cpu.index+q+1)
+			For x As Integer = 0 To 15
+				'If Bit(p Shl 8 +p2,15-x)  Then
+				If (p Shl 8 +p2 And(&h8000 Shr x)) then
+					If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y+1) Mod (cpu.yres+1)) = 1 then
+						cpu.v(&hf) = 1
+					EndIf
+					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1
+				EndIf
+			Next
+			q+=2
+		Next
+	EndIf
 	cpu.drawflag=1
 End Sub
 
@@ -246,45 +268,45 @@ Sub INS_LOADREG 'FX65
 	'cpu.index+= vx+1
 End Sub
 Sub INS_SCROLLN '00CN
-Dim As UByte N
-n = cpu.opcode And &h000F
-For i As Integer = 1 To N
-	For y As Integer = 63 To 1 Step -1
-		For x As Integer = 0 To 127
-			display(x,y) = display (x,y-1)
+	Dim As UByte N
+	n = cpu.opcode And &h000F
+	For i As Integer = 1 To N
+		For y As Integer = 63 To 1 Step -1
+			For x As Integer = 0 To 127
+				display(x,y) = display (x,y-1)
+			Next
 		Next
+		cpu.drawflag = 1
+		render
 	Next
-	cpu.drawflag = 1
-	render
-Next
 End Sub
 
 Sub INS_RIGHTSCR '00FB
-For y As Integer = 0 To cpu.yres
-	For x As Integer = cpu.xres To 4 Step -1
-		display(x,y) = display (x-4,y)
+	For y As Integer = 0 To cpu.yres
+		For x As Integer = cpu.xres To 4 Step -1
+			display(x,y) = display (x-4,y)
+		Next
+		For x As Integer = 3 to 0 Step -1
+			display(x,y) = 0
+		Next
 	Next
-	For x As Integer = 3 to 0 Step -1
-		display(x,y) = 0
-	Next
-Next
-cpu.drawflag = 1
+	cpu.drawflag = 1
 End Sub
 
 Sub INS_LEFTSCR '00FC
-For y As Integer = 0 To cpu.yres
-	For x As Integer = 0 To cpu.xres-4
-		display(x,y) = display (x+4,y)
+	For y As Integer = 0 To cpu.yres
+		For x As Integer = 0 To cpu.xres-4
+			display(x,y) = display (x+4,y)
+		Next
+		For x As Integer = cpu.xres-3 To cpu.xres
+			display(x,y) = 0
+		Next
 	Next
-	For x As Integer = cpu.xres-3 To cpu.xres
-		display(x,y) = 0
-	Next
-Next
-cpu.drawflag = 1
+	cpu.drawflag = 1
 End Sub
 
 Sub INS_EXCHIP '00FD
- CAE
+	CAE
 End Sub
 Sub INS_DISEXT '00FE
 	cpu.mode = "CHIP-8"
@@ -292,8 +314,8 @@ Sub INS_DISEXT '00FE
 	cpu.yres = 31
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
-   sfy = screeny/(cpu.yres+1) ' and Y
-   If colorlines Then colorit
+	sfy = screeny/(cpu.yres+1) ' and Y
+	If colorlines Then colorit
 End Sub
 Sub INS_ENEXT  '00FF
 	cpu.mode = "SCHIP"
@@ -301,8 +323,11 @@ Sub INS_ENEXT  '00FF
 	cpu.yres = 63
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
-   sfy = screeny/(cpu.yres+1) ' and Y
-   If colorlines Then colorit
+	sfy = screeny/(cpu.yres+1) ' and Y
+	If colorlines Then colorit
+	ops*=2
+	start = timer
+	cpu.opcount = 0
 End Sub
 Sub INS_TENSPRITE 'FX30
 	cpu.index = (cpu.v(vx)*10)+80
@@ -310,12 +335,12 @@ Sub INS_TENSPRITE 'FX30
 End Sub
 
 Sub INS_STORERPL 'FX75
-For i As Integer = 0 To vx
-	cpu.hp48(i) = cpu.V(i)
-Next
+	For i As Integer = 0 To vx
+		cpu.hp48(i) = cpu.V(i)
+	Next
 End Sub
 Sub INS_READRPL 'FX85
-For i As Integer = 0 To vx
-	 cpu.V(i) = cpu.hp48(i)
-	 next
+	For i As Integer = 0 To vx
+		cpu.V(i) = cpu.hp48(i)
+	next
 End Sub

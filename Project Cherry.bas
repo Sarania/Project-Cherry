@@ -33,7 +33,7 @@ Type controller
 	Left As UByte
 	Right As ubyte
 End Type
-
+Dim Shared didlogo As UByte = 0
 Dim Shared As controller c
 Dim Shared As chip8 CPU 'main cpu
 Dim Shared display(0 To cpu.xres, 0 To cpu.yres) As UByte 'Monochrome display
@@ -95,7 +95,7 @@ Dim Shared As UByte Sfont(0 To 159) => _ 'SCHIP font set
 
 
 Declare Sub initcpu 'initialize CPU
-Declare Sub loadprog 'load ROM to memory
+Declare Sub loadprog(ByVal pn As String = "") 'load ROM to memory
 Declare Sub loadini 'load teh ini
 Declare Sub about 'project information
 Declare Sub extract 'extract VX and VY from cpu.opcode
@@ -386,7 +386,7 @@ EndIf
 
 End Sub
 Sub render
-	Dim As Single clr = rgb(foreR,foreG,foreB)
+	Dim As integer clr = rgb(ForeR,foreG,ForeB)
 	screenbuff = ImageCreate(screenx,screeny,RGB(backR,backG,backB))
 	For y As UInteger = 1 To cpu.yres+1
 		If colorlines = 1 Then clr = dispcolor(y)
@@ -432,8 +432,9 @@ Sub initcpu 'initialize the CPU to power on state
 	Next
 End Sub
 
-Sub loadprog 'Load a ROM
+Sub loadprog(ByVal pn As String = "") 'Load a ROM
 	Dim As String progname, shpname, onechr
+		If pn <> "" Then progname = pn: GoTo gotname
 	If Command(1) <> "" Then'See if we got a filename from the command line/drag and drop/double click
 		progname = Command(1)
 		GoTo gotname
@@ -470,11 +471,12 @@ Sub loadprog 'Load a ROM
 	WindowTitle "Project Cherry: " & shpname ' set window title
 	Dim As Integer f = FreeFile
 	Open progname For Binary As #f
-	For i As Integer = 0 To Lof(1)
-		Get #1, i+1, cpu.memory(i+512), 1 ' file is 1 indexed, array is 0 indexed
+	For i As Integer = 0 To Lof(f)
+		Get #f, i+1, cpu.memory(i+512), 1 ' file is 1 indexed, array is 0 indexed
 	Next
 	Close #f
 End Sub
+
 
 Sub CAE 'Cleanup and Exit
 	Cls
@@ -492,7 +494,9 @@ If colorlines Then colorit
 sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
 sfy = screeny/(cpu.yres+1) ' and Y
 initcpu
-loadprog
+ChDir ExePath
+ChDir ".."
+loadprog CurDir & ("/res/logo.bin")
 Cls
 start = Timer
 chipstart = Timer
@@ -670,7 +674,7 @@ Do
 		Draw String debugbox, (2, 22), cpu.key(0) & "_" & cpu.key(1) & "_" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
 	   Draw String debugbox, (2, 32), "Delay timer: " & cpu.delayTimer
 	   Draw String debugbox, (2, 42), "Sound timer: " & cpu.soundTimer
-	   Draw String debugbox, (2, 52), "Ops per second: " & ops
+	   Draw String debugbox, (2, 52), "Ops per second: " & cpu.opcount
 	   Draw String debugbox, (2, 62), "Emulator mode: " & cpu.mode
       put (0,0),debugBox, pset
 	   ImageDestroy(debugbox)
@@ -679,6 +683,11 @@ Do
 
 If dosave = 1 Then saveState: dosave = 0: cpu.drawflag = 1: End if
 If doload = 1 Then loadstate: doload = 0: cpu.drawflag = 1: End If
-
+If didlogo = 0 And cpu.opcount > 600 Then
+	didlogo = 1
+	initcpu
+	cls
+	loadprog
+EndIf
 If InKey = Chr(255) + "k" Then CAE
 Loop
