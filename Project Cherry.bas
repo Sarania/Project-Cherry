@@ -276,7 +276,7 @@ End Sub
 
 
 Sub keycheck 'Check for keypresses, and pass to the emulated CPU
-	For i As Integer = 1 To 15
+	For i As Integer = 0 To 15
 		cpu.key(i) = 0
 	Next
 	If MultiKey(SC_UP) Or MultiKey(SC_W) Then c.up = 1 Else c.up = 0
