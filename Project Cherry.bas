@@ -326,6 +326,11 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 		If c.right Then cpu.key(6) = 1 
 		If c.up Then cpu.key(5) = 1
 	EndIf
+	If layout = 6 Then
+		If c.left then cpu.key(3) = 1
+		If c.right then cpu.key(12) = 1
+		If c.up then cpu.key(10) = 1
+	EndIf
 	If MultiKey(SC_ESCAPE) Then
 		CAE
 	EndIf
@@ -466,6 +471,8 @@ Sub loadprog(ByVal pn As String = "") 'Load a ROM
    If UCase(Left(shpname,5)) = "BRICK" Then layout = 3
    If UCase(Left(shpname,4)) = "PONG" Then layout = 4
    If UCase(Left(shpname,14)) = "SPACE INVADERS" Then layout = 5
+   If UCase(Left(shpname,3)) = "ANT" Then layout = 6
+   
    
    
 	WindowTitle "Project Cherry: " & shpname ' set window title
@@ -674,7 +681,7 @@ Do
 		Draw String debugbox, (2, 22), cpu.key(0) & "_" & cpu.key(1) & "_" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
 	   Draw String debugbox, (2, 32), "Delay timer: " & cpu.delayTimer
 	   Draw String debugbox, (2, 42), "Sound timer: " & cpu.soundTimer
-	   Draw String debugbox, (2, 52), "Ops per second: " & cpu.opcount
+	   Draw String debugbox, (2, 52), "Speed(OPS): " & ops
 	   Draw String debugbox, (2, 62), "Emulator mode: " & cpu.mode
       put (0,0),debugBox, pset
 	   ImageDestroy(debugbox)
