@@ -257,7 +257,7 @@ Sub INS_LEFTSCR '00FC
 End Sub
 
 Sub INS_EXCHIP '00FD
-
+ 
 End Sub
 Sub INS_DISEXT '00FE
 
@@ -269,8 +269,15 @@ Sub INS_TENSPRITE 'FX30
 
 End Sub
 Sub INS_STORERPL 'FX75
-
+	
+For i As Integer = 0 To vx
+	cpu.hp48(i) = cpu.V(i)
+	
+Next
 End Sub
 Sub INS_READRPL 'FX85
 
+For i As Integer = 0 To vx
+	 cpu.V(i) = cpu.hp48(i)
+	 next
 End Sub
