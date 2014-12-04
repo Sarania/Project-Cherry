@@ -59,6 +59,23 @@ Dim Shared As UByte font(0 To 79) => _ 'Chip 8 font set
 &hF0, &h80, &hF0, &h80, &hF0, _ ' E
 &hF0, &h80, &hF0, &h80, &h80}   ' F
 
+Dim Shared As UByte Sfont(0 To 159) => _ 'SCHIP font set
+   {&hF0, &hF0, &h90, &h90, &h90, &h90, &h90, &h90, &hF0, &hF0,_ '0
+    &h20, &h20, &h60, &h60, &h20, &h20, &h20, &h20, &h70, &h70,_ '1
+    &hF0, &hF0, &h10, &h10, &hF0, &hF0, &h80, &h80, &hF0, &hF0,_ '2
+    &hF0, &hF0, &h10, &h10, &hF0, &hF0, &h10, &h10, &hF0, &hF0,_ '3
+    &h90, &h90, &h90, &h90, &hF0, &hF0, &h10, &h10, &h10, &h10,_ '4
+    &hF0, &hF0, &h80, &h80, &hF0, &hF0, &h10, &h10, &hF0, &hF0,_ '5
+    &hF0, &hF0, &h80, &h80, &hF0, &hF0, &h90, &h90, &hF0, &hF0,_ '6
+    &hF0, &hF0, &h10, &h10, &h20, &h20, &h40, &h40, &h40, &h40,_ '7
+    &hF0, &hF0, &h90, &h90, &hF0, &hF0, &h90, &h90, &hF0, &hF0,_ '8
+    &hF0, &hF0, &h90, &h90, &hF0, &hF0, &h10, &h10, &hF0, &hF0,_ '9
+    &hF0, &hF0, &h90, &h90, &hF0, &hF0, &h90, &h90, &h90, &h90,_ 'A
+    &hE0, &hE0, &h90, &h90, &hE0, &hE0, &h90, &h90, &hE0, &hE0,_ 'B
+    &hF0, &hF0, &h80, &h80, &h80, &h80, &h80, &h80, &hF0, &hF0,_ 'C
+    &hE0, &hE0, &h90, &h90, &h90, &h90, &h90, &h90, &hE0, &hE0,_ 'D
+    &hF0, &hF0, &h80, &h80, &hF0, &hF0, &h80, &h80, &hF0, &hF0,_ 'E
+    &hF0, &hF0, &h80, &h80, &hF0, &hF0, &h80, &h80, &h80, &h80}  'F
 
 
 Declare Sub initcpu 'initialize CPU
@@ -335,6 +352,9 @@ Sub initcpu 'initialize the CPU to power on state
 	'Copy the font into memory
 	For i As Integer = 0 To 79
 		cpu.memory(i) = font(i)
+	Next
+	For i As Integer = 80 To 159
+		cpu.memory(i) = Sfont(i)
 	Next
 End Sub
 
