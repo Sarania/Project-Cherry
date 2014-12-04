@@ -36,8 +36,8 @@ Declare Sub INS_SCROLLN '00CN
 Declare Sub INS_HIRES 'F800
 
 Sub INS_HIRES 'F800
-	cpu.xres = 64
-	cpu.yres = 64
+	cpu.xres = 63
+	cpu.yres = 63
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
    sfy = screeny/(cpu.yres+1) ' and Y
@@ -260,10 +260,20 @@ Sub INS_EXCHIP '00FD
  
 End Sub
 Sub INS_DISEXT '00FE
+	cpu.xres = 63
+	cpu.yres = 31
+	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
+	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
+   sfy = screeny/(cpu.yres+1) ' and Y
 
 End Sub
 Sub INS_ENEXT  '00FF
-
+	beep
+	cpu.xres = 127
+	cpu.yres = 63
+	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
+	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
+   sfy = screeny/(cpu.yres+1) ' and Y
 End Sub
 Sub INS_TENSPRITE 'FX30
 
@@ -275,7 +285,6 @@ For i As Integer = 0 To vx
 Next
 End Sub
 Sub INS_READRPL 'FX85
-
 For i As Integer = 0 To vx
 	 cpu.V(i) = cpu.hp48(i)
 	 next
