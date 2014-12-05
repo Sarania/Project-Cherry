@@ -344,3 +344,59 @@ Sub INS_READRPL 'FX85
 		cpu.V(i) = cpu.hp48(i)
 	next
 End Sub
+Sub INS_DISMEGAMODE
+		cpu.mode = "CHIP-8"
+	cpu.xres = 63
+	cpu.yres = 31
+	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
+	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
+	sfy = screeny/(cpu.yres+1) ' and Y
+	If colorlines Then colorit
+End Sub
+Sub INS_ENMEGAMODE
+		cpu.xres = 255
+	cpu.yres = 192
+	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
+	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
+	sfy = screeny/(cpu.yres+1) ' and Y
+	ops*=2
+	start = timer
+	cpu.opcount = 0
+End Sub
+Sub INS_LHDI
+	
+End Sub
+Sub INS_LOADCOLORS
+	
+End Sub
+Sub INS_SPRITEWIDTH
+	
+End Sub
+Sub INS_SPRITEHEIGHT
+	
+End Sub
+Sub INS_SETALPHA
+	
+End Sub
+Sub INS_PLAYSOUND
+	
+End Sub
+Sub INS_STOPSOUND
+	
+End Sub
+Sub INS_BLENDMODE
+	
+End Sub
+Sub INS_SCROLLND
+	Dim As UByte N
+	n = cpu.opcode And &h000F
+	For i As Integer = 1 To N
+		For y As Integer = 63 To 0 Step +1
+			For x As Integer = 0 To 127
+				display(x,y) = display (x,y+1)
+			Next
+		Next
+		cpu.drawflag = 1
+		render
+	Next
+End Sub

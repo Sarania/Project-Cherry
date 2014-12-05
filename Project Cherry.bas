@@ -656,6 +656,39 @@ Do
 
 		Case "READRPL"
 			INS_READRPL
+			
+		Case "DISMEGAMODE"
+			INS_DISMEGAMODE
+		
+		Case "ENMEGAMODE"
+			INS_ENMEGAMODE
+			
+		Case "LHDI"
+			INS_LHDI
+			
+		Case "LOADCOLORS"
+			INS_LOADCOLORS
+		
+		Case "SPRITEWIDTH"
+			INS_SPRITEWIDTH
+			
+		Case "SPRITEHEIGHT"
+			INS_SPRITEHEIGHT
+			
+		Case "SETALPHA"
+			INS_SETALPHA
+		
+		Case "PLAYSOUND"
+			INS_PLAYSOUND
+			
+		Case "STOPSOUND"
+			INS_STOPSOUND
+			
+		Case "BLENDMODE"
+			INS_BLENDMODE
+			
+		Case "SCROLLND"
+			INS_SCROLLND
 
 		Case Else
 			Cls
