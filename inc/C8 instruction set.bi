@@ -161,7 +161,6 @@ Sub INS_DISPLAY 'DXYN
 	Dim p As UShort
 	Dim p2 As UShort
 	Dim q As UByte = 0
-	Dim ppoint As UShort Pointer
 	n = cpu.opcode And &h000F
 	cpu.v(&hf) = 0
 	If n = 0 Then n = 16
@@ -173,8 +172,7 @@ Sub INS_DISPLAY 'DXYN
 					If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y+1) Mod (cpu.yres+1)) = 1 then
 						cpu.v(&hf) = 1
 					EndIf
-
-					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1
+					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
 				EndIf
 			Next
 		Next
@@ -185,12 +183,11 @@ Sub INS_DISPLAY 'DXYN
 			p = cpu.memory(cpu.index+q)
 			p2 = cpu.memory(cpu.index+q+1)
 			For x As Integer = 0 To 15
-				'If Bit(p Shl 8 +p2,15-x)  Then
-				If (p Shl 8 +p2 And(&h8000 Shr x)) then
+				If (p Shl 8 + p2 And (&h8000 Shr x)) then
 					If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y+1) Mod (cpu.yres+1)) = 1 then
 						cpu.v(&hf) = 1
 					EndIf
-					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1
+					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
 				EndIf
 			Next
 			q+=2

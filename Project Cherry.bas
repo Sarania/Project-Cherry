@@ -45,7 +45,7 @@ Dim Shared As UInteger VX, VY, KK 'Chip 8 vars
 Dim Shared As UInteger screenx, screeny, ops 'screen size, and ops per second
 Dim Shared As UInteger foreR, foreG, foreB, backR, backG, backB 'screen colors
 Dim Shared As UInteger sfx, sfy 'scale factor for display
-Dim Shared As Single version = 0.7 'version
+Dim Shared As Single version = 0.95 'version
 Dim Shared As UByte dosave, doload
 Dim Shared As UByte colorlines, aspect
 Dim Shared As UByte layout = 0
@@ -478,7 +478,9 @@ Sub loadprog(ByVal pn As String = "") 'Load a ROM
 	WindowTitle "Project Cherry: " & shpname ' set window title
 	Dim As Integer f = FreeFile
 	Open progname For Binary As #f
-	For i As Integer = 0 To Lof(f)
+	Dim As UInteger maxlen
+	If Lof(f) > 4095-512 Then maxlen = 4095-512 Else maxlen = Lof(f)
+	For i As Integer = 0 To maxlen
 		Get #f, i+1, cpu.memory(i+512), 1 ' file is 1 indexed, array is 0 indexed
 	Next
 	Close #f
