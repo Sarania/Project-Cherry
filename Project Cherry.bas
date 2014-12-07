@@ -17,7 +17,7 @@ Type Chip8
 	V(0 To 15) As UByte 'Registers V0-VF
 	stack(0 To 15) As UShort 'The stack
 	sp As UShort 'Stack pointer
-	Index As UShort 'Generally holds addresses, it's a register
+	Index As UInteger 'Generally holds addresses, it's a register
 	PC As UShort 'Program counter
 	delayTimer As UByte 'counts to 0 at 60hz
 	soundTimer As UByte 'counts to 0 at 60hz, plays a beep when it hits 0
@@ -393,16 +393,22 @@ End Sub
 Sub render
 	Dim As integer clr = rgb(ForeR,foreG,ForeB)
 	screenbuff = ImageCreate(screenx,screeny,RGB(backR,backG,backB))
-	For y As UInteger = 1 To cpu.yres+1
-		If colorlines = 1 Then clr = dispcolor(y)
-		For x As UInteger = 1 To cpu.xres+1
-			If display(x,y) = 1 Then
-			For z As Integer = sfy To 1 Step -1
-				Line screenbuff, (x*sfx-(sfx/2)+IIf(y=cpu.yres+1,sfx,0), (y*sfy-z))-(x*sfx+(sfx/2)+IIf(y=cpu.yres+1,sfx,0),(y*sfy-z)), clr
-			Next
-			End if
-		Next
+	'For y As UInteger = 1 To cpu.yres+1
+'		If colorlines = 1 Then clr = dispcolor(y)
+'		For x As UInteger = 1 To cpu.xres+1
+'			If display(x,y) = 1 Then
+'			For z As Integer = sfy To 1 Step -1
+'				Line screenbuff, (x*sfx-(sfx/2)+IIf(y=cpu.yres+1,sfx,0), (y*sfy-z))-(x*sfx+(sfx/2)+IIf(y=cpu.yres+1,sfx,0),(y*sfy-z)), clr
+'			Next
+'			End if
+'		Next
+'	Next
+For y As UInteger = 0 To cpu.yres
+	If colorlines = 1 Then clr = dispcolor(y)
+	For x As UInteger = 0 To cpu.xres
+		If display(x,y) = 1 Then Line screenbuff, (x*sfx,y*sfy)-(x*sfx+sfx,y*sfy+sfy), clr, BF
 	Next
+Next
 	Put (0,0),screenbuff,PSet
 ImageDestroy(screenbuff)
 End Sub
@@ -708,16 +714,17 @@ Do
 	End If
 
 	If debug = 1 Then 'print debug infos
-		debugbox = ImageCreate(254,74,RGB(128,0,128))
-		Line debugbox, (1,1)-(252,72),RGB(128,0,128), BF
-		Line debugbox, (1,1)-(252,72),RGB(255,255,255),B
+		debugbox = ImageCreate(254,84,RGB(128,0,128))
+		Line debugbox, (1,1)-(252,82),RGB(128,0,128), BF
+		Line debugbox, (1,1)-(252,82),RGB(255,255,255),B
 		Draw String debugbox, (2,2), "Instruction: " & cpu.instruction 
 		Draw String debugbox, (2, 12), "1-2-3-4-q-w-e-r-a-s-d-f-z-x-c-v"
 		Draw String debugbox, (2, 22), cpu.key(0) & "_" & cpu.key(1) & "_" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
 	   Draw String debugbox, (2, 32), "Delay timer: " & cpu.delayTimer
 	   Draw String debugbox, (2, 42), "Sound timer: " & cpu.soundTimer
-	   Draw String debugbox, (2, 52), "Speed(OPS): " & ops
-	   Draw String debugbox, (2, 62), "Emulator mode: " & cpu.mode
+	   Draw String debugbox, (2, 52), "Speed(OPS) Goal: " & ops
+	   Draw String debugbox, (2, 62), "Op/s: " & cpu.opcount / (Timer - start)
+	   Draw String debugbox, (2, 72), "Emulator mode: " & cpu.mode
       put (0,0),debugBox, pset
 	   ImageDestroy(debugbox)
 	End If

@@ -169,10 +169,10 @@ Sub INS_DISPLAY 'DXYN
 			p = cpu.memory(cpu.index+y)
 			For x As Integer = 0 To 7
 				If (p And (&h80 Shr x)) <> 0 Then
-					If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y+1) Mod (cpu.yres+1)) = 1 then
+					If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y) Mod (cpu.yres+1)) = 1 then
 						cpu.v(&hf) = 1
 					EndIf
-					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
+					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
 				EndIf
 			Next
 		Next
@@ -184,10 +184,10 @@ Sub INS_DISPLAY 'DXYN
 			p2 = cpu.memory(cpu.index+q+1)
 			For x As Integer = 0 To 15
 				If (p Shl 8 + p2 And (&h8000 Shr x)) then
-					If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y+1) Mod (cpu.yres+1)) = 1 then
+					If display((cpu.v(vx)+x) Mod (cpu.xres), (cpu.v(vy)+y) Mod (cpu.yres+1)) = 1 then
 						cpu.v(&hf) = 1
 					EndIf
-					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
+					display((cpu.v(vx)+x) Mod (cpu.xres),(cpu.v(vy)+y) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
 				EndIf
 			Next
 			q+=2
@@ -351,7 +351,7 @@ Sub INS_DISMEGAMODE
 	If colorlines Then colorit
 End Sub
 Sub INS_ENMEGAMODE
-		cpu.xres = 255
+	cpu.xres = 255
 	cpu.yres = 192
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
