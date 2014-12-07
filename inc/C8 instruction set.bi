@@ -268,7 +268,7 @@ Sub INS_SCROLLN '00CN
 	Dim As UByte N
 	n = cpu.opcode And &h000F
 	For i As Integer = 1 To N
-		For y As Integer = 63 To 1 Step -1
+		For y As Integer = 63 To 0 Step -1
 			For x As Integer = 0 To 127
 				display(x,y) = display (x,y-1)
 			Next

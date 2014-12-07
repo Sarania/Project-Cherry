@@ -3,6 +3,7 @@
 #Include Once "fbgfx.bi"
 Using FB
 #Include Once "file.bi"
+#Include Once "fmod.bi" ' a whole audio library just for boop sounds!
 
 Dim Shared As UByte debug = 1 ' 1 to show debug, 0 to not show
 
@@ -20,7 +21,7 @@ Type Chip8
 	Index As UInteger 'Generally holds addresses, it's a register
 	PC As UShort 'Program counter
 	delayTimer As UByte 'counts to 0 at 60hz
-	soundTimer As UByte 'counts to 0 at 60hz, plays a beep when it hits 0
+	soundTimer As UByte 'counts to 0 at 60hz, plays a beep when <> 0
 	key(0 To 15) As UByte 'Hex keypad
 	hp48(0 To 7) As UByte 'SCHIP registers
 	xres As UByte = 63 'display X
@@ -49,10 +50,14 @@ Dim Shared As Single version = 0.95 'version
 Dim Shared As UByte dosave, doload
 Dim Shared As UByte colorlines, aspect
 Dim Shared As UByte layout = 0
+Dim Shared As UByte booping = 0, mute = 0
+Dim Shared As Single soundplaytime ' make sound play at LEAST .1 seconds
+Dim Shared As Integer Ptr trackhandle 'SFX pointer
 Declare Sub keycheck 'check keys, this must be defined here because the following includes depend on it
 Declare Sub CAE 'cleanup and exit
 Declare Sub render 'render the display
 Declare Sub colorit
+Declare Sub playSFX(SFX As String) ' play the boop sound
 #Include Once "inc/c8 instruction set.bi" 'these must go here because depend on cpu type
 #Include Once "inc/decoder.bi" 'same
 
@@ -102,6 +107,20 @@ Declare Sub extract 'extract VX and VY from cpu.opcode
 Declare Sub saveState
 Declare Sub loadstate
 
+Sub playSFX (SFX As String)
+	If mute=0 Then
+		trackHandle = FSOUND_Stream_Open(SFX, FSOUND_LOOP_NORMAL, 0, 0 )
+		FSOUND_Stream_Play(1, trackHandle)
+		FSOUND_SetVolumeAbsolute(1, 255)
+	End If
+End Sub
+
+Sub stopSFX
+	If FSOUND_IsPlaying(1) Then
+		FSOUND_Stream_Stop(trackHandle)
+		FSOUND_Stream_Close(trackHandle)
+	End If
+End Sub
 
 Sub colorit
 	ReDim Preserve dispcolor(1 To cpu.yres+1)
@@ -256,6 +275,7 @@ Sub loadini
 		Print #f, 0 'Background Blue
 		Print #f, 0 '1 for random color lines
 		Print #f, 0' 1 for aspect correct scaling
+		Print #f, 0 'mute on
 		Close #f
 	EndIf
 	Open ExePath & "\cherry.ini" For Input As #f
@@ -270,6 +290,7 @@ Sub loadini
 	Input #f, backB
 	Input #f, Colorlines
 	input #f, aspect
+	Input #f, mute
 	Close #f
 End Sub
 
@@ -331,10 +352,10 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 		If c.right then cpu.key(12) = 1
 		If c.up then cpu.key(10) = 1
 	EndIf
-	If MultiKey(SC_ESCAPE) Then
+	If MultiKey(SC_ESCAPE) Then 'quit
 		CAE
 	EndIf
-	If MultiKey(SC_HOME) Then
+	If MultiKey(SC_HOME) Then 'about
 		about
 		Cls
 	EndIf
@@ -357,7 +378,7 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 		Wend
 	EndIf
 	
-	If MultiKey(SC_F3) Then
+	If MultiKey(SC_F3) Then 'savestate
 	Beep
 	dosave = 1
 	Draw String (5,5), "State saved successfully!", RGB(128,0,255)
@@ -367,7 +388,7 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 	Wend
 EndIf
 
-If MultiKey(SC_F5) Then
+If MultiKey(SC_F5) Then 'load state
 	Beep
 	If Not FileExists(ExePath & "/cherry.state") Or Not FileExists(ExePath & "/cherry.ram") Then 
 		Draw String(5,5), "No save state found!", RGB(255,0,0)
@@ -381,12 +402,21 @@ If MultiKey(SC_F5) Then
 	Wend
 End If
 
-If MultiKey(sc_tilde) Then
+If MultiKey(SC_P) Then ' mute toggle
+	If mute = 1 Then mute = 0 Else mute = 1
+	cpu.soundtimer = 15
+	While MultiKey(SC_P)
+		Sleep 15
+	Wend
+EndIf
+
+If MultiKey(sc_tilde) Then 'debug info toggle
 	If debug = 1 Then debug = 0 Else debug = 1
 	cpu.drawflag = 1
 	While MultiKey(SC_TILDE)
 		Sleep 15
 	Wend
+	
 EndIf
 
 End Sub
@@ -494,6 +524,7 @@ End Sub
 
 
 Sub CAE 'Cleanup and Exit
+	FSOUND_Close
 	Cls
 	Close
 	End
@@ -508,12 +539,15 @@ ScreenRes screenx,screeny,32
 If colorlines Then colorit
 sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
 sfy = screeny/(cpu.yres+1) ' and Y
+FSOUND_Init(44100, 8, 0)
 initcpu
 if debug = 1 then: didlogo=1: loadprog: GoTo skiplogo:EndIf
 ChDir ExePath
 ChDir ".."
 loadprog CurDir & ("/res/logo.bin")
 skiplogo:
+ChDir ExePath
+ChDir ".."
 Cls
 start = Timer
 chipstart = Timer
@@ -714,6 +748,17 @@ Do
 		If cpu.soundtimer > 0 Then cpu.soundtimer-=1
 		chipstart = Timer 'reset the timer
 	End If
+	
+	If booping = 0 And cpu.soundtimer > 0 Then
+		booping = 1
+		soundplaytime = timer
+		playSFX(ExePath & "/boop.wav")
+	EndIf
+	
+	If booping = 1 And cpu.soundtimer = 0 And (Timer - soundplaytime) > 0.1 Then
+		booping = 0
+		stopSFX
+	EndIf
 
 	If debug = 1 Then 'print debug infos
 		debugbox = ImageCreate(254,84,RGB(128,0,128))
