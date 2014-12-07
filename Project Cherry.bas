@@ -509,9 +509,11 @@ If colorlines Then colorit
 sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
 sfy = screeny/(cpu.yres+1) ' and Y
 initcpu
+if debug = 1 then: didlogo=1: loadprog: GoTo skiplogo:EndIf
 ChDir ExePath
 ChDir ".."
 loadprog CurDir & ("/res/logo.bin")
+skiplogo:
 Cls
 start = Timer
 chipstart = Timer
