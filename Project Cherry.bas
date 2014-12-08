@@ -5,7 +5,7 @@ Using FB
 #Include Once "file.bi"
 #Include Once "fmod.bi" ' a whole audio library just for boop sounds!
 
-Dim Shared As UByte debug = 1 ' 1 to show debug, 0 to not show
+Dim Shared As UByte debug = 0 ' 1 to show debug, 0 to not show
 
 Type Chip8
 	mode As String = "CHIP-8"
@@ -46,7 +46,7 @@ Dim Shared As UInteger VX, VY, KK 'Chip 8 vars
 Dim Shared As UInteger screenx, screeny, ops 'screen size, and ops per second
 Dim Shared As UInteger foreR, foreG, foreB, backR, backG, backB 'screen colors
 Dim Shared As UInteger sfx, sfy 'scale factor for display
-Dim Shared As Single version = 0.95 'version
+Dim Shared As Single version = 1.00 'version
 Dim Shared As UByte dosave, doload
 Dim Shared As UByte colorlines, aspect
 Dim Shared As UByte layout = 0
@@ -250,6 +250,19 @@ Sub about 'Display about section when HOME key is pressed
 	Print "Blyss Sarania"
 	Print
 	Print "Nobbs66"
+	Print
+	Print
+	Print
+	Print
+	Print
+	Print
+	Print
+	Print
+	Print "___________________________________________________________________________"
+	Print
+	Print "FMOD audio library copyright © Firelight Technologies Pty, Ltd., 1994-2014."
+	Print "http://www.fmod.org/"
+	Print "FMOD is free for non-commercial use"
 	Put (screenx-128,screeny-148), cherry, Trans
 	Put (0,screeny-148), banner, Trans
 	Locate 49, 1:
