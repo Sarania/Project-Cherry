@@ -169,10 +169,10 @@ Sub INS_DISPLAY 'DXYN
 			p = cpu.memory(cpu.index+y)
 			For x As Integer = 0 To 7
 				If (p And (&h80 Shr x)) <> 0 Then
-					If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y) Mod (cpu.yres+1)) = 1 then
+					If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y+1) Mod (cpu.yres+1)) = 1 then
 						cpu.v(&hf) = 1
 					EndIf
-					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
+					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
 				EndIf
 			Next
 		Next
@@ -184,10 +184,10 @@ Sub INS_DISPLAY 'DXYN
 			p2 = cpu.memory(cpu.index+q+1)
 			For x As Integer = 0 To 15
 				If (p Shl 8 + p2 And (&h8000 Shr x)) then
-					If display((cpu.v(vx)+x) Mod (cpu.xres), (cpu.v(vy)+y) Mod (cpu.yres+1)) = 1 then
+					If display((cpu.v(vx)+x+1) Mod (cpu.xres+1), (cpu.v(vy)+y+1) Mod (cpu.yres+1)) = 1 then
 						cpu.v(&hf) = 1
 					EndIf
-					display((cpu.v(vx)+x) Mod (cpu.xres),(cpu.v(vy)+y) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
+					display((cpu.v(vx)+x+1) Mod (cpu.xres+1),(cpu.v(vy)+y+1) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
 				EndIf
 			Next
 			q+=2
@@ -268,17 +268,17 @@ Sub INS_SCROLLN '00CN
 	Dim As UByte N
 	n = cpu.opcode And &h000F
 	For i As Integer = 1 To N
-		For y As Integer = 63 To 0 Step -1
-			For x As Integer = 0 To 127
+		For y As Integer = cpu.yres To 1 Step -1
+			For x As Integer = 0 To cpu.xres
 				display(x,y) = display (x,y-1)
 			Next
 		Next
 		cpu.drawflag = 1
-		render
 	Next
 End Sub
 
 Sub INS_RIGHTSCR '00FB
+
 	For y As Integer = 0 To cpu.yres
 		For x As Integer = cpu.xres To 4 Step -1
 			display(x,y) = display (x-4,y)
