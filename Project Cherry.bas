@@ -1,8 +1,9 @@
 'Chip 8 Emulator in FreeBASIC
 'Written by Blyss Sarania and Nobbs66
-#Include Once "fbgfx.bi"
-Using FB
-#Include Once "file.bi"
+#Include Once "fbgfx.bi" 'FB graphics library
+Using FB 'FB namespace
+#Include Once "file.bi" ' file manipulation
+#Include Once "string.bi" ' string manipulation
 #Include Once "fmod.bi" ' a whole audio library just for boop sounds!
 
 Dim Shared As UByte debug = 0 ' 1 to show debug, 0 to not show
@@ -81,22 +82,22 @@ Dim Shared As UByte font(0 To 79) => _ 'Chip 8 font set
 &hF0, &h80, &hF0, &h80, &h80}   ' F
 
 Dim Shared As UByte Sfont(0 To 159) => _ 'SCHIP font set
-   {&hF0, &hF0, &h90, &h90, &h90, &h90, &h90, &h90, &hF0, &hF0,_ '0
-    &h20, &h20, &h60, &h60, &h20, &h20, &h20, &h20, &h70, &h70,_ '1
-    &hF0, &hF0, &h10, &h10, &hF0, &hF0, &h80, &h80, &hF0, &hF0,_ '2
-    &hF0, &hF0, &h10, &h10, &hF0, &hF0, &h10, &h10, &hF0, &hF0,_ '3
-    &h90, &h90, &h90, &h90, &hF0, &hF0, &h10, &h10, &h10, &h10,_ '4
-    &hF0, &hF0, &h80, &h80, &hF0, &hF0, &h10, &h10, &hF0, &hF0,_ '5
-    &hF0, &hF0, &h80, &h80, &hF0, &hF0, &h90, &h90, &hF0, &hF0,_ '6
-    &hF0, &hF0, &h10, &h10, &h20, &h20, &h40, &h40, &h40, &h40,_ '7
-    &hF0, &hF0, &h90, &h90, &hF0, &hF0, &h90, &h90, &hF0, &hF0,_ '8
-    &hF0, &hF0, &h90, &h90, &hF0, &hF0, &h10, &h10, &hF0, &hF0,_ '9
-    &hF0, &hF0, &h90, &h90, &hF0, &hF0, &h90, &h90, &h90, &h90,_ 'A
-    &hE0, &hE0, &h90, &h90, &hE0, &hE0, &h90, &h90, &hE0, &hE0,_ 'B
-    &hF0, &hF0, &h80, &h80, &h80, &h80, &h80, &h80, &hF0, &hF0,_ 'C
-    &hE0, &hE0, &h90, &h90, &h90, &h90, &h90, &h90, &hE0, &hE0,_ 'D
-    &hF0, &hF0, &h80, &h80, &hF0, &hF0, &h80, &h80, &hF0, &hF0,_ 'E
-    &hF0, &hF0, &h80, &h80, &hF0, &hF0, &h80, &h80, &h80, &h80}  'F
+{&hF0, &hF0, &h90, &h90, &h90, &h90, &h90, &h90, &hF0, &hF0,_ '0
+&h20, &h20, &h60, &h60, &h20, &h20, &h20, &h20, &h70, &h70,_ '1
+&hF0, &hF0, &h10, &h10, &hF0, &hF0, &h80, &h80, &hF0, &hF0,_ '2
+&hF0, &hF0, &h10, &h10, &hF0, &hF0, &h10, &h10, &hF0, &hF0,_ '3
+&h90, &h90, &h90, &h90, &hF0, &hF0, &h10, &h10, &h10, &h10,_ '4
+&hF0, &hF0, &h80, &h80, &hF0, &hF0, &h10, &h10, &hF0, &hF0,_ '5
+&hF0, &hF0, &h80, &h80, &hF0, &hF0, &h90, &h90, &hF0, &hF0,_ '6
+&hF0, &hF0, &h10, &h10, &h20, &h20, &h40, &h40, &h40, &h40,_ '7
+&hF0, &hF0, &h90, &h90, &hF0, &hF0, &h90, &h90, &hF0, &hF0,_ '8
+&hF0, &hF0, &h90, &h90, &hF0, &hF0, &h10, &h10, &hF0, &hF0,_ '9
+&hF0, &hF0, &h90, &h90, &hF0, &hF0, &h90, &h90, &h90, &h90,_ 'A
+&hE0, &hE0, &h90, &h90, &hE0, &hE0, &h90, &h90, &hE0, &hE0,_ 'B
+&hF0, &hF0, &h80, &h80, &h80, &h80, &h80, &h80, &hF0, &hF0,_ 'C
+&hE0, &hE0, &h90, &h90, &h90, &h90, &h90, &h90, &hE0, &hE0,_ 'D
+&hF0, &hF0, &h80, &h80, &hF0, &hF0, &h80, &h80, &hF0, &hF0,_ 'E
+&hF0, &hF0, &h80, &h80, &hF0, &hF0, &h80, &h80, &h80, &h80}  'F
 
 
 Declare Sub initcpu 'initialize CPU
@@ -124,15 +125,15 @@ End Sub
 
 Sub colorit
 	ReDim Preserve dispcolor(1 To cpu.yres+1)
-		Dim As UByte r, g, b
-		For y As Integer = 1 To cpu.yres+1
-			recolor:
-			r = (Rnd * 255) 
-			g = (Rnd * 255) 
-			b = (Rnd * 255)
-			If r+g+b < 255 Then GoTo recolor
-			dispcolor(y) = RGB(r,g,b)
-		Next
+	Dim As UByte r, g, b
+	For y As Integer = 1 To cpu.yres+1
+		recolor:
+		r = (Rnd * 255)
+		g = (Rnd * 255)
+		b = (Rnd * 255)
+		If r+g+b < 255 Then GoTo recolor
+		dispcolor(y) = RGB(r,g,b)
+	Next
 End Sub
 
 Sub saveState
@@ -156,21 +157,21 @@ Sub saveState
 	Print #f, cpu.soundTimer
 	Print #f, cpu.xres
 	Print #f, cpu.yres
-   Print #f, start
-   Print #f, ops
-   Print #f, sfx
-   Print #f, sfy
-   For y As Integer = 0 To cpu.yres
-   	For x As Integer = 0 To cpu.xres
-   		Print #f, display(x,y)
-   	Next
-   Next
-   Close #f
-   f = FreeFile
-   Open ExePath & "/cherry.ram" For Binary As #f
-   Put #f, 1, cpu.memory()
-   Close #f
-   start = Timer
+	Print #f, start
+	Print #f, ops
+	Print #f, sfx
+	Print #f, sfy
+	For y As Integer = 0 To cpu.yres
+		For x As Integer = 0 To cpu.xres
+			Print #f, display(x,y)
+		Next
+	Next
+	Close #f
+	f = FreeFile
+	Open ExePath & "/cherry.ram" For Binary As #f
+	Put #f, 1, cpu.memory()
+	Close #f
+	start = Timer
 	cpu.opcount = 0
 End Sub
 
@@ -201,10 +202,10 @@ Sub loadstate
 	Input #f, sfx
 	Input #f, sfy
 	For y As Integer = 0 To cpu.yres
-   	For x As Integer = 0 To cpu.xres
-   		input #f, display(x,y)
-   	Next
-   Next
+		For x As Integer = 0 To cpu.xres
+			input #f, display(x,y)
+		Next
+	Next
 	Close #f
 	f = FreeFile
 	Open ExePath & "/cherry.ram" For Binary As #f
@@ -222,57 +223,37 @@ Sub extract 'extract VX and VY from cpu.opcode
 End Sub
 
 Sub about 'Display about section when HOME key is pressed
+		Cls
 	Dim cherry As fb.image Ptr
 	Dim banner As fb.image Ptr
 	cherry = ImageCreate(128,148,RGB(0,0,0))
 	banner = ImageCreate(400,148,RGB(0,0,0))
 	BLoad ("res/cherry.bmp",cherry)
 	BLoad ("res/banner.bmp",banner)
-	Cls
-	Print "Project Cherry v" & version
-	Print "_____________________"
-	Print
-	Print "Project Cherry is a Chip8 emulator written in FreeBASIC."
-	Print ""
-	Print "CHIP-8 is an interpreted programming language, developed by Joseph Weisbecker."
-	Print ""
-	Print "It was initially used on the COSMAC VIP and Telmac 1800 8-bit microcomputers in"
-	Print ""
-	Print "the mid 1970s. CHIP-8 programs are run on a CHIP-8 virtual machine or emulator."
-	Print
-	Print
-	Print
-	Print
-	Print
-	Print "Project Cherry was written by:"
-	Print "______________________________"
-	Print
-	Print "Blyss Sarania"
-	Print
-	Print "Nobbs66"
-	Print
-	Print
-	Print
-	Print
-	Print
-	Print
-	Print
-	Print
-	Print "___________________________________________________________________________"
-	Print
-	Print "FMOD audio library copyright © Firelight Technologies Pty, Ltd., 1994-2014."
-	Print "http://www.fmod.org/"
-	Print "FMOD is free for non-commercial use"
+	Draw String (0,0), "Project Cherry v" & Format(version, "0.00")
+	Draw String (0,10), "_____________________"
+	Draw String (0,30), "Project Cherry is a Chip8 emulator written in FreeBASIC."
+	Draw String (0,50), "CHIP-8 is an interpreted programming language, developed by Joseph Weisbecker."
+	Draw String (0,70), "It was initially used on the COSMAC VIP and Telmac 1800 8-bit microcomputers in"
+	Draw String (0,90), "the mid 1970s. CHIP-8 programs are run on a CHIP-8 virtual machine or emulator."
+	Draw String (0,150), "Project Cherry was written by:"
+	Draw String (0,160), "______________________________"
+	Draw String (0,180), "Blyss Sarania"
+	Draw String (0,200), "Nobbs66"
 	Put (screenx-128,screeny-148), cherry, Trans
-	Put (0,screeny-148), banner, Trans
-	Locate 49, 1:
-	Print "Compiled on: " + Str(__DATE__) + " at " + Str(__TIME__)
-	Print "Compiled with FreeBASIC version " + Str(__FB_VER_MAJOR__) + "." + Str(__FB_VER_MINOR__) + "." + Str(__FB_VER_PATCH__)
+	Put (0,screeny-168), banner, Trans
+	Draw String (0, screeny-220), "___________________________________________________________________________"
+	Draw String (0, screeny-200), "FMOD audio library copyright © Firelight Technologies Pty, Ltd., 1994-2014."
+	Draw String (0, screeny-190), "http://www.fmod.org/"
+	Draw String (0, screeny-180), "FMOD is free for non-commercial use"
+	Draw String (0, screeny-20), "Compiled on: " + Str(__DATE__) + " at " + Str(__TIME__)
+	Draw String (0, screeny-10), "Compiled with FreeBASIC version " + Str(__FB_VER_MAJOR__) + "." + Str(__FB_VER_MINOR__) + "." + Str(__FB_VER_PATCH__)
 	ImageDestroy(cherry)
 	ImageDestroy(banner)
 	Sleep 'wait for keypress
 	cpu.drawflag = 1 'reset drawflag since we cleared the screen
 End Sub
+
 Sub loadini
 	Dim f As Integer = FreeFile
 	If Not FileExists(ExePath & "\cherry.ini") Then
@@ -287,7 +268,7 @@ Sub loadini
 		Print #f, 0 'Background Green
 		Print #f, 0 'Background Blue
 		Print #f, 0 '1 for random color lines
-		Print #f, 0' 1 for aspect correct scaling
+		Print #f, 1' 1 for aspect correct scaling
 		Print #f, 0 'mute on
 		Close #f
 	EndIf
@@ -305,6 +286,8 @@ Sub loadini
 	input #f, aspect
 	Input #f, mute
 	Close #f
+	If screenx < 640 Then screenx = 640
+	If screeny < 480 Then screeny = 480
 End Sub
 
 
@@ -318,22 +301,22 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 	If MultiKey(SC_LEFT) Or MultiKey(SC_A) Then c.left = 1 Else c.left = 0
 	If MultiKey(SC_RIGHT) Or MultiKey(SC_D) Then c.right = 1 Else c.right = 0
 	If layout = 0 Then
-	If MultiKey(SC_1) Then cpu.key(1) = 1
-	If MultiKey(SC_2) Then cpu.key(2) = 1
-	If MultiKey(SC_3) Then cpu.key(3) = 1
-	If MultiKey(SC_4) Then cpu.key(12) = 1
-	If MultiKey(sc_r) Then cpu.key(13) = 1
-	If MultiKey(sc_a) Then cpu.key(7) = 1
-	If MultiKey(sc_s) Then cpu.key(8) = 1
-	If MultiKey(SC_d) Then cpu.key(9) = 1
-	If MultiKey(sc_f) Then cpu.key(14) = 1
-	If MultiKey(SC_q) Then cpu.key(4) = 1
-	If MultiKey(SC_w) Then cpu.key(5) = 1
-	If MultiKey(SC_e) Then cpu.key(6) = 1
-	If MultiKey(SC_z) Then cpu.key(10) = 1
-	If MultiKey(SC_x) Then cpu.key(0) = 1
-	If MultiKey(SC_c) Then cpu.key(11) = 1
-	If MultiKey(SC_v) Then cpu.key(15) = 1
+		If MultiKey(SC_1) Then cpu.key(1) = 1
+		If MultiKey(SC_2) Then cpu.key(2) = 1
+		If MultiKey(SC_3) Then cpu.key(3) = 1
+		If MultiKey(SC_4) Then cpu.key(12) = 1
+		If MultiKey(sc_r) Then cpu.key(13) = 1
+		If MultiKey(sc_a) Then cpu.key(7) = 1
+		If MultiKey(sc_s) Then cpu.key(8) = 1
+		If MultiKey(SC_d) Then cpu.key(9) = 1
+		If MultiKey(sc_f) Then cpu.key(14) = 1
+		If MultiKey(SC_q) Then cpu.key(4) = 1
+		If MultiKey(SC_w) Then cpu.key(5) = 1
+		If MultiKey(SC_e) Then cpu.key(6) = 1
+		If MultiKey(SC_z) Then cpu.key(10) = 1
+		If MultiKey(SC_x) Then cpu.key(0) = 1
+		If MultiKey(SC_c) Then cpu.key(11) = 1
+		If MultiKey(SC_v) Then cpu.key(15) = 1
 	End If
 	If layout = 1 Then
 		If c.left Then cpu.key(7) = 1
@@ -349,15 +332,15 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 	EndIf
 	If layout = 3 Then
 		If c.left Then cpu.key(4) = 1
-		If c.right Then cpu.key(6) = 1 
+		If c.right Then cpu.key(6) = 1
 	EndIf
 	If layout = 4 Then
-		If c.up Or c.left Then cpu.key(1) = 1 
+		If c.up Or c.left Then cpu.key(1) = 1
 		If c.down Or c.right Then cpu.key(4) = 1
 	EndIf
 	If layout = 5 Then
 		If c.left Then cpu.key(4) = 1
-		If c.right Then cpu.key(6) = 1 
+		If c.right Then cpu.key(6) = 1
 		If c.up Then cpu.key(5) = 1
 	EndIf
 	If layout = 6 Then
@@ -390,70 +373,62 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 			Sleep 15
 		Wend
 	EndIf
-	
+
 	If MultiKey(SC_F3) Then 'savestate
-	Beep
-	dosave = 1
-	Draw String (5,5), "State saved successfully!", RGB(128,0,255)
-	Sleep 1000,1
-	While MultiKey(SC_F3)
-		Sleep 15
-	Wend
-EndIf
-
-If MultiKey(SC_F5) Then 'load state
-	Beep
-	If Not FileExists(ExePath & "/cherry.state") Or Not FileExists(ExePath & "/cherry.ram") Then 
-		Draw String(5,5), "No save state found!", RGB(255,0,0)
-	Else
-		doload = 1
-		Draw String (5,5), "State loaded successfully!", RGB(128,0,255)
+		Beep
+		dosave = 1
+		Draw String ((screenx/2) - 100,screeny/2), "State saved successfully!", RGB(255,0,255)
+		Sleep 1000,1
+		While MultiKey(SC_F3)
+			Sleep 15
+		Wend
 	EndIf
-	Sleep 1000,1
-	While MultiKey(SC_F5)
-		Sleep 15
-	Wend
-End If
 
-If MultiKey(SC_P) Then ' mute toggle
-	If mute = 1 Then mute = 0 Else mute = 1
-	cpu.soundtimer = 15
-	While MultiKey(SC_P)
-		Sleep 15
-	Wend
-EndIf
+	If MultiKey(SC_F5) Then 'load state
+		Beep
+		If Not FileExists(ExePath & "/cherry.state") Or Not FileExists(ExePath & "/cherry.ram") Then
+			Draw String(5,5), "No save state found!", RGB(255,0,0)
+		Else
+			doload = 1
+			Draw String ((screenx/2) - 104,screeny/2), "State loaded successfully!", RGB(255,0,255)
+		EndIf
+		Sleep 1000,1
+		While MultiKey(SC_F5)
+			Sleep 15
+		Wend
+	End If
 
-If MultiKey(sc_tilde) Then 'debug info toggle
-	If debug = 1 Then debug = 0 Else debug = 1
-	cpu.drawflag = 1
-	While MultiKey(SC_TILDE)
-		Sleep 15
-	Wend
-	
-EndIf
+	If MultiKey(SC_P) Then ' mute toggle
+		If mute = 1 Then mute = 0 Else mute = 1
+		cpu.soundtimer = 15
+		While MultiKey(SC_P)
+			Sleep 15
+		Wend
+	EndIf
+
+	If MultiKey(sc_tilde) Then 'debug info toggle
+		If debug = 1 Then debug = 0 Else debug = 1
+		cpu.drawflag = 1
+		While MultiKey(SC_TILDE)
+			Sleep 15
+		Wend
+
+	EndIf
 
 End Sub
 Sub render
+	Dim As UInteger offsety = 0
+	If aspect = 1 Then offsety = screeny/6
 	Dim As integer clr = rgb(ForeR,foreG,ForeB)
 	screenbuff = ImageCreate(screenx,screeny,RGB(backR,backG,backB))
-	'For y As UInteger = 1 To cpu.yres+1
-'		If colorlines = 1 Then clr = dispcolor(y)
-'		For x As UInteger = 1 To cpu.xres+1
-'			If display(x,y) = 1 Then
-'			For z As Integer = sfy To 1 Step -1
-'				Line screenbuff, (x*sfx-(sfx/2)+IIf(y=cpu.yres+1,sfx,0), (y*sfy-z))-(x*sfx+(sfx/2)+IIf(y=cpu.yres+1,sfx,0),(y*sfy-z)), clr
-'			Next
-'			End if
-'		Next
-'	Next
-For y As UInteger = 0 To cpu.yres
-	If colorlines = 1 Then clr = dispcolor(y)
-	For x As UInteger = 0 To cpu.xres
-		If display(x,y) = 1 Then Line screenbuff, (x*sfx,y*sfy)-(x*sfx+sfx,y*sfy+sfy), clr, BF
+	For y As UInteger = 0 To cpu.yres+1
+		If colorlines = 1 Then clr = dispcolor(y)
+		For x As UInteger = 0 To cpu.xres+1
+			If display(x,y) = 1 Then Line screenbuff, (x*sfx,(y*sfy)+offsety)-(x*sfx+sfx,(y*sfy+sfy)+offsety), clr, BF
+		Next
 	Next
-Next
 	Put (0,0),screenbuff,PSet
-ImageDestroy(screenbuff)
+	ImageDestroy(screenbuff)
 End Sub
 
 
@@ -488,7 +463,7 @@ End Sub
 
 Sub loadprog(ByVal pn As String = "") 'Load a ROM
 	Dim As String progname, shpname, onechr
-		If pn <> "" Then progname = pn: GoTo gotname
+	If pn <> "" Then progname = pn: GoTo gotname
 	If Command(1) <> "" Then'See if we got a filename from the command line/drag and drop/double click
 		progname = Command(1)
 		GoTo gotname
@@ -514,17 +489,17 @@ Sub loadprog(ByVal pn As String = "") 'Load a ROM
 		EndIf
 		shpname = shpname & onechr
 	Next
-   If UCase(Left(shpname,6)) = "BLINKY" Then layout = 1
-   If UCase(Left(shpname,6)) = "TETRIS" Then layout = 2
-   If UCase(Left(shpname,8)) = "BREAKOUT" Then layout = 3
-   If UCase(Left(shpname,5)) = "BRICK" Then layout = 3
-   If UCase(Left(shpname,4)) = "PONG" Then layout = 4
-   If UCase(Left(shpname,14)) = "SPACE INVADERS" Then layout = 5
-   If UCase(Left(shpname,3)) = "ANT" Then layout = 6
-   
-   
-   
-	WindowTitle "Project Cherry: " & shpname ' set window title
+	If UCase(Left(shpname,6)) = "BLINKY" Then layout = 1
+	If UCase(Left(shpname,6)) = "TETRIS" Then layout = 2
+	If UCase(Left(shpname,8)) = "BREAKOUT" Then layout = 3
+	If UCase(Left(shpname,5)) = "BRICK" Then layout = 3
+	If UCase(Left(shpname,4)) = "PONG" Then layout = 4
+	If UCase(Left(shpname,14)) = "SPACE INVADERS" Then layout = 5
+	If UCase(Left(shpname,3)) = "ANT" Then layout = 6
+
+
+
+	If pn <> CurDir & ("/res/logo.bin") Then WindowTitle "Project Cherry: " & shpname Else WindowTitle "Project Cherry"' set window title
 	Dim As Integer f = FreeFile
 	Open progname For Binary As #f
 	Dim As UInteger maxlen
@@ -551,7 +526,7 @@ loadini
 ScreenRes screenx,screeny,32
 If colorlines Then colorit
 sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
-sfy = screeny/(cpu.yres+1) ' and Y
+sfy = iif(aspect = 0, screeny/(cpu.yres+1), sfx) ' and Y
 FSOUND_Init(44100, 8, 0)
 initcpu
 if debug = 1 then: didlogo=1: loadprog: GoTo skiplogo:EndIf
@@ -584,7 +559,7 @@ Do
 	Select Case cpu.instruction
 		Case "HIRES"
 			INS_HIRES
-		
+
 		Case "CLS"
 			INS_CLS
 
@@ -713,37 +688,37 @@ Do
 
 		Case "READRPL"
 			INS_READRPL
-			
+
 		Case "DISMEGAMODE"
 			INS_DISMEGAMODE
-		
+
 		Case "ENMEGAMODE"
 			INS_ENMEGAMODE
-			
+
 		Case "LHDI"
 			INS_LHDI
-			
+
 		Case "LOADCOLORS"
 			INS_LOADCOLORS
-		
+
 		Case "SPRITEWIDTH"
 			INS_SPRITEWIDTH
-			
+
 		Case "SPRITEHEIGHT"
 			INS_SPRITEHEIGHT
-			
+
 		Case "SETALPHA"
 			INS_SETALPHA
-		
+
 		Case "PLAYSOUND"
 			INS_PLAYSOUND
-			
+
 		Case "STOPSOUND"
 			INS_STOPSOUND
-			
+
 		Case "BLENDMODE"
 			INS_BLENDMODE
-			
+
 		Case "SCROLLND"
 			INS_SCROLLND
 
@@ -761,13 +736,13 @@ Do
 		If cpu.soundtimer > 0 Then cpu.soundtimer-=1
 		chipstart = Timer 'reset the timer
 	End If
-	
+
 	If booping = 0 And cpu.soundtimer > 0 Then
 		booping = 1
 		soundplaytime = timer
 		playSFX(ExePath & "/boop.wav")
 	EndIf
-	
+
 	If booping = 1 And cpu.soundtimer = 0 And (Timer - soundplaytime) > 0.1 Then
 		booping = 0
 		stopSFX
@@ -777,26 +752,26 @@ Do
 		debugbox = ImageCreate(254,84,RGB(128,0,128))
 		Line debugbox, (1,1)-(252,82),RGB(128,0,128), BF
 		Line debugbox, (1,1)-(252,82),RGB(255,255,255),B
-		Draw String debugbox, (2,2), "Instruction: " & cpu.instruction 
+		Draw String debugbox, (2,2), "Instruction: " & cpu.instruction
 		Draw String debugbox, (2, 12), "1-2-3-4-q-w-e-r-a-s-d-f-z-x-c-v"
 		Draw String debugbox, (2, 22), cpu.key(0) & "_" & cpu.key(1) & "_" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
-	   Draw String debugbox, (2, 32), "Delay timer: " & cpu.delayTimer
-	   Draw String debugbox, (2, 42), "Sound timer: " & cpu.soundTimer
-	   Draw String debugbox, (2, 52), "Speed(OPS) Goal: " & ops
-	   Draw String debugbox, (2, 62), "Op/s: " & cpu.opcount / (Timer - start)
-	   Draw String debugbox, (2, 72), "Emulator mode: " & cpu.mode
-      put (0,0),debugBox, pset
-	   ImageDestroy(debugbox)
+		Draw String debugbox, (2, 32), "Delay timer: " & cpu.delayTimer
+		Draw String debugbox, (2, 42), "Sound timer: " & cpu.soundTimer
+		Draw String debugbox, (2, 52), "Speed(OPS) Goal: " & ops
+		Draw String debugbox, (2, 62), "Op/s: " & cpu.opcount / (Timer - start)
+		Draw String debugbox, (2, 72), "Emulator mode: " & cpu.mode
+		put (0,0),debugBox, pset
+		ImageDestroy(debugbox)
 	End If
 
 
-If dosave = 1 Then saveState: dosave = 0: cpu.drawflag = 1: End if
-If doload = 1 Then loadstate: doload = 0: cpu.drawflag = 1: End If
-If didlogo = 0 And cpu.opcount > 600 Then
-	didlogo = 1
-	initcpu
-	cls
-	loadprog
-EndIf
-If InKey = Chr(255) + "k" Then CAE
+	If dosave = 1 Then saveState: dosave = 0: cpu.drawflag = 1: End if
+	If doload = 1 Then loadstate: doload = 0: cpu.drawflag = 1: End If
+	If didlogo = 0 And cpu.opcount > 600 Then
+		didlogo = 1
+		initcpu
+		cls
+		loadprog
+	EndIf
+	If InKey = Chr(255) + "k" Then CAE
 Loop

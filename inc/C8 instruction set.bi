@@ -41,7 +41,7 @@ Sub INS_HIRES 'F800
 	cpu.yres = 63
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
-	sfy = screeny/(cpu.yres+1) ' and Y
+	sfy = iif(aspect = 0, screeny/(cpu.yres+1), sfx) ' and Y
 	cpu.pc = &h2c0
 	If colorlines Then colorit
 End Sub
@@ -311,7 +311,7 @@ Sub INS_DISEXT '00FE
 	cpu.yres = 31
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
-	sfy = screeny/(cpu.yres+1) ' and Y
+	sfy = iif(aspect = 0, screeny/(cpu.yres+1), sfx) ' and Y
 	If colorlines Then colorit
 End Sub
 Sub INS_ENEXT  '00FF
@@ -320,7 +320,7 @@ Sub INS_ENEXT  '00FF
 	cpu.yres = 63
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
-	sfy = screeny/(cpu.yres+1) ' and Y
+	sfy = iif(aspect = 0, screeny/(cpu.yres+1), sfx) ' and Y
 	If colorlines Then colorit
 	ops*=2
 	start = timer
@@ -347,7 +347,7 @@ Sub INS_DISMEGAMODE
 	cpu.yres = 31
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
-	sfy = screeny/(cpu.yres+1) ' and Y
+	sfy = iif(aspect = 0, screeny/(cpu.yres+1), sfx) ' and Y
 	If colorlines Then colorit
 End Sub
 Sub INS_ENMEGAMODE
@@ -355,7 +355,7 @@ Sub INS_ENMEGAMODE
 	cpu.yres = 192
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
-	sfy = screeny/(cpu.yres+1) ' and Y
+	sfy = iif(aspect = 0, screeny/(cpu.yres+1), sfx) ' and Y
 	ops*=2
 	start = timer
 	cpu.opcount = 0
