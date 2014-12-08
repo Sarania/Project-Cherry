@@ -5,6 +5,7 @@ Project Cherry is a Chip-8/SCHIP emulator in FreeBASIC.
 
 Written by:
 Blyss Sarania (http://forums.pcsx2.net/User-Blyss-Sarania)
+
 Nobbs66 (http://forums.pcsx2.net/User-Nobbs66)
 
 Controls:
