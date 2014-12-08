@@ -421,9 +421,9 @@ Sub render
 	If aspect = 1 Then offsety = screeny/6
 	Dim As integer clr = rgb(ForeR,foreG,ForeB)
 	screenbuff = ImageCreate(screenx,screeny,RGB(backR,backG,backB))
-	For y As UInteger =  1 To cpu.yres+1
+	For y As UInteger =  0 To cpu.yres
 		If colorlines = 1 Then clr = dispcolor(y)
-		For x As UInteger = 0 To cpu.xres+1
+		For x As UInteger = 0 To cpu.xres
 			If display(x,y) = 1 Then Line screenbuff, (x*sfx,(y*sfy)+offsety)-(x*sfx+sfx,(y*sfy+sfy)+offsety), clr, BF
 		Next
 	Next
