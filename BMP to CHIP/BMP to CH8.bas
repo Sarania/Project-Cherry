@@ -23,7 +23,7 @@ Do
 Loop
 
 Dim As Byte bmploader(0 To 47)
-Open "bmploader.bin" For Binary As #1
+Open ExePath & "/bmploader.bin" For Binary As #1
 Get #1, 1, bmploader()
 Close #1
 

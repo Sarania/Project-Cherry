@@ -26,7 +26,7 @@ I am pretty permissive with my stuff, but there ARE some things you can not do w
 
 
 Disclaimer:
-This software is provided AS IS without any warranty, including the implied ones for merchantability and/or fitness
+This software is provided AS IS without any warranty, including the implied ones of merchantability and/or fitness
 for a particular purpose. Use of any of the software is AT YOUR OWN RISK. You agree that should any
 negative effect result from the use of the software, you are solely responsible.
 

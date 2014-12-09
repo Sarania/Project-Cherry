@@ -6,7 +6,7 @@ Using FB 'FB namespace
 #Include Once "string.bi" ' string manipulation
 #Include Once "fmod.bi" ' a whole audio library just for boop sounds!
 
-Dim Shared As UByte debug = 1 ' 1 to show debug, 0 to not show
+Dim Shared As UByte debug = 0' 1 to show debug, 0 to not show
 
 Type Chip8
 	mode As String = "CHIP-8"
