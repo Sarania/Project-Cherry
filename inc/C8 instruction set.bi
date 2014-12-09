@@ -160,7 +160,6 @@ Sub INS_DISPLAY 'DXYN
 	Dim n As UShort
 	Dim p As UShort
 	Dim p2 As UShort
-	Dim q As UByte = 0
 	n = cpu.opcode And &h000F
 	cpu.v(&hf) = 0
 	If n = 0 Then n = 16
@@ -168,11 +167,13 @@ Sub INS_DISPLAY 'DXYN
 		For y As Integer = 0 To n-1
 			p = cpu.memory(cpu.index+y)
 			For x As Integer = 0 To 7
-				If (p And (&h80 Shr x)) <> 0 Then
-					If display((cpu.v(vx)+x) Mod (cpu.xres+1), (cpu.v(vy)+y) Mod (cpu.yres+1)) = 1 then
-						cpu.v(&hf) = 1
-					EndIf
-					display((cpu.v(vx)+x) Mod (cpu.xres+1),(cpu.v(vy)+y) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
+				If (p And (&h80 Shr x)) Then
+				If hack <> 0 Then
+						If cpu.v(vx)+x > cpu.xres Then Exit For 
+						If hack <> 2 and cpu.v(vy)+y > cpu.yres Then Exit for
+				EndIf
+					If display((cpu.v(vx)+x) And cpu.xres, (cpu.v(vy)+y) And cpu.yres) Then cpu.v(&hf) = 1
+					 display((cpu.v(vx)+x) And cpu.xres, (cpu.v(vy)+y)And cpu.yres) Xor = 1
 				EndIf
 			Next
 		Next
@@ -180,17 +181,17 @@ Sub INS_DISPLAY 'DXYN
 
 	If n = 16 And cpu.mode <> "CHIP-8" Then '16x16 sprite. More complicated. This took forever to figure out!
 		For y As Integer = 0 To 15
-			p = cpu.memory(cpu.index+q)
-			p2 = cpu.memory(cpu.index+q+1)
+			p = cpu.memory(cpu.index+(y*2))
+			p2 = cpu.memory(cpu.index+(y*2)+1)
 			For x As Integer = 0 To 15
-				If (p Shl 8 + p2 And (&h8000 Shr x)) then
-					If display((cpu.v(vx)+x+1) Mod (cpu.xres+1), (cpu.v(vy)+y) Mod (cpu.yres+1)) = 1 then
-						cpu.v(&hf) = 1
-					EndIf
-					display((cpu.v(vx)+x+1) Mod (cpu.xres+1),(cpu.v(vy)+y) Mod (cpu.yres+1)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
+				If (p Shl 8 + p2 And (&h8000 Shr x)) Then
+				If hack = 1 Then
+						If cpu.v(vx)+x > cpu.xres Or cpu.v(vy)+y > cpu.yres Then Exit for
+				EndIf
+					If display((cpu.v(vx)+x) And (cpu.xres), (cpu.v(vy)+y) And (cpu.yres)) Then cpu.v(&hf) = 1
+					display((cpu.v(vx)+x) And (cpu.xres),(cpu.v(vy)+y) And (cpu.yres)) Xor = 1 ' XOR the pixel onto the screen. If a pixel was already on, it gets turned off
 				EndIf
 			Next
-			q+=2
 		Next
 	EndIf
 	cpu.drawflag=1
@@ -217,7 +218,6 @@ Sub INS_KEYWAIT 'FX0A
 				Exit Do
 			EndIf
 		Next
-		Sleep 15
 	Loop
 End Sub
 
@@ -268,10 +268,13 @@ Sub INS_SCROLLN '00CN
 	Dim As UByte N
 	n = cpu.opcode And &h000F
 	For i As Integer = 1 To N
-		For y As Integer = cpu.yres To 0 Step -1
+		For y As Integer = cpu.yres To 1 Step -1
 			For x As Integer = 0 To cpu.xres
 				display(x,y) = display (x,y-1)
 			Next
+		Next
+		For x As Integer = 0 To cpu.xres
+			display(x,0) = 0
 		Next
 		cpu.drawflag = 1
 	Next

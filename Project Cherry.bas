@@ -6,7 +6,7 @@ Using FB 'FB namespace
 #Include Once "string.bi" ' string manipulation
 #Include Once "fmod.bi" ' a whole audio library just for boop sounds!
 
-Dim Shared As UByte debug = 0 ' 1 to show debug, 0 to not show
+Dim Shared As UByte debug = 1 ' 1 to show debug, 0 to not show
 
 Type Chip8
 	mode As String = "CHIP-8"
@@ -48,7 +48,10 @@ Dim Shared As UInteger screenx, screeny, ops 'screen size, and ops per second
 Dim Shared As UInteger foreR, foreG, foreB, backR, backG, backB 'screen colors
 Dim Shared As UInteger sfx, sfy 'scale factor for display
 Dim Shared As Single version = 1.00 'version
+Dim Shared As ULongInt frames
+Dim Shared As Double frametime, framestart
 Dim Shared As UByte dosave, doload
+Dim Shared As UByte hack = 0
 Dim Shared As UByte colorlines, aspect
 Dim Shared As UByte layout = 0
 Dim Shared As UByte booping = 0, mute = 0
@@ -417,18 +420,22 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 
 End Sub
 Sub render
+	frames+=1
+	Dim As Double renderstart = Timer
 	Dim As UInteger offsety = 0
 	If aspect = 1 Then offsety = screeny/6
 	Dim As integer clr = rgb(ForeR,foreG,ForeB)
 	screenbuff = ImageCreate(screenx,screeny,RGB(backR,backG,backB))
 	For y As UInteger =  0 To cpu.yres
 		If colorlines = 1 Then clr = dispcolor(y)
+		'If y = 0 Then clr = RGB(255,0,0) Else clr = RGB(255,255,255)
 		For x As UInteger = 0 To cpu.xres
 			If display(x,y) = 1 Then Line screenbuff, (x*sfx,(y*sfy)+offsety)-(x*sfx+sfx,(y*sfy+sfy)+offsety), clr, BF
 		Next
 	Next
 	Put (0,0),screenbuff,PSet
 	ImageDestroy(screenbuff)
+	frametime = Timer-renderstart
 End Sub
 
 
@@ -496,8 +503,17 @@ Sub loadprog(ByVal pn As String = "") 'Load a ROM
 	If UCase(Left(shpname,4)) = "PONG" Then layout = 4
 	If UCase(Left(shpname,14)) = "SPACE INVADERS" Then layout = 5
 	If UCase(Left(shpname,3)) = "ANT" Then layout = 6
+	
+	'Games that need wrapping off:
+	If UCase(shpname) = "BOWLING [GOOITZEN VAN DER WAL].CH8" Then hack = 1
+	If UCase(shpname) = "BLITZ [DAVID WINTER].CH8" Then hack = 1
+	If UCase(shpname) = "SQUASH [DAVID WINTER].CH8" Then hack = 1
+	If UCase(shpname) = "WALL [DAVID WINTER].CH8" Then hack = 1
+	If UCase(shpname) = "JUMPING X AND O [HARRY KLEINBERG, 1977].CH8" Then hack = 1
+	If UCase(shpname) = "MINES! - THE MINEHUNTER [DAVID WINTER, 1997].CH8" Then hack = 1
+	If UCase(shpname) = "ROCKET LAUNCH [JONAS LINDSTEDT].CH8" Then hack = 2
 
-
+   
 
 	If pn <> CurDir & ("/res/logo.bin") Then WindowTitle "Project Cherry: " & shpname Else WindowTitle "Project Cherry"' set window title
 	Dim As Integer f = FreeFile
@@ -539,6 +555,7 @@ ChDir ".."
 Cls
 start = Timer
 chipstart = Timer
+framestart = timer
 
 
 'main loop
@@ -749,9 +766,9 @@ Do
 	EndIf
 
 	If debug = 1 Then 'print debug infos
-		debugbox = ImageCreate(254,84,RGB(128,0,128))
-		Line debugbox, (1,1)-(252,82),RGB(128,0,128), BF
-		Line debugbox, (1,1)-(252,82),RGB(255,255,255),B
+		debugbox = ImageCreate(264,104,RGB(128,0,128))
+		Line debugbox, (1,1)-(262,102),RGB(128,0,128), BF
+		Line debugbox, (1,1)-(262,102),RGB(255,255,255),B
 		Draw String debugbox, (2,2), "Instruction: " & cpu.instruction
 		Draw String debugbox, (2, 12), "1-2-3-4-q-w-e-r-a-s-d-f-z-x-c-v"
 		Draw String debugbox, (2, 22), cpu.key(0) & "_" & cpu.key(1) & "_" & cpu.key(2) & "_" & cpu.key(3) & "_" & cpu.key(4) & "_" & cpu.key(5) & "_" & cpu.key(6) & "_" & cpu.key(7) & "_" & cpu.key(8) & "_" & cpu.key(9) & "_" & cpu.key(10) & "_" & cpu.key(11) & "_" & cpu.key(12) & "_" & cpu.key(13) & "_" & cpu.key(14) & "_" & cpu.key(15)
@@ -760,6 +777,8 @@ Do
 		Draw String debugbox, (2, 52), "Speed(OPS) Goal: " & ops
 		Draw String debugbox, (2, 62), "Op/s: " & cpu.opcount / (Timer - start)
 		Draw String debugbox, (2, 72), "Emulator mode: " & cpu.mode
+		Draw String debugbox, (2, 82), "FPS: " & frames / (Timer - framestart)
+		Draw String debugbox, (2, 92), "Frame time: " & Format(frametime, "0.00000") & " | " & Format(1/frametime, "0.0000") 
 		put (0,0),debugBox, pset
 		ImageDestroy(debugbox)
 	End If
