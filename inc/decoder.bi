@@ -10,6 +10,7 @@ If LEFT(opctemp, 1) = "C" And Len(opctemp) < 4 Then
 		Exit Sub
 EndIf
 
+
 	If opctemp = "F800" Then
 		cpu.instruction = "HIRES"
 		Exit sub
@@ -205,45 +206,57 @@ EndIf
 		cpu.instruction = "STORERPL"
 		Exit Sub
 	EndIf
+	
 	If Right(opctemp, 2) = "85" Then
 		cpu.instruction = "READRPL"
 		Exit Sub
+	End If
+	
 	If Right(opctemp, 2) = "10" Then
 		cpu.instruction = "ENMEGAMODE"
 		Exit Sub
 	EndIf
+	
 	If Right(opctemp, 2) = "11" Then 
 		cpu.instruction = "DISMEGAMODE"
 		Exit Sub
 	EndIf
+	
 	If Left(opctemp, 2) = "01" Then 
 		cpu.instruction = "LHDI"
 		Exit Sub
 	EndIf
+	
 	If Left(opctemp, 2) = "02" Then 
 		cpu.instruction = "LOADCOLORS"
 		Exit Sub
 	EndIf
+	
 	If Left(opctemp, 2) = "03" Then
 		cpu.instruction = "SPRITEWIDTH"
 		Exit Sub
 	EndIf
+	
 	If Left(opctemp, 2) = "04" Then 
 		cpu.instruction = "SPRITEHEIGHT"
 		Exit Sub
 	EndIf
+	
 	If Left(opctemp, 2) = "05" Then 
 		cpu.instruction = "SETALPHA"
 		Exit Sub
 	EndIf
+	
 	If Left(opctemp, 2) = "06" Then
 		cpu.instruction = "PLAYSOUND"
 		Exit sub
 	EndIf
+	
 	If Left(opctemp, 2) = "07" Then 
 		cpu.instruction = "STOPSOUND"
 		Exit Sub
 	EndIf
+	
 	If Left(opctemp, 2) = "08" Then 
 		cpu.instruction = "BLENDMODE"
 		Exit Sub
@@ -251,9 +264,12 @@ EndIf
 	If LEFT(opctemp, 1) = "B" And Len(opctemp) < 4 Then
 		cpu.instruction = "SCROLLN"
 		Exit Sub
-		End If
-	EndIf
+	End If
+	
+	
 	cpu.instruction = "BAD DECODE"
+
+	
 
 
 End Sub

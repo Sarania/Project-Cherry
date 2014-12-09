@@ -745,7 +745,9 @@ Do
 			Print "Decoder error!"
 			Print "Opcode: " & Hex(cpu.opcode)
 			Print "Instruction: " & cpu.instruction
-			Print cpu.opcount
+			Print "Opcount: " & cpu.opcount
+			Print "PC: " & Hex(cpu.pc)
+			print "File address: " & hex(cpu.pc - &h200)
 			Sleep
 	End Select
 	

@@ -41,8 +41,9 @@ Sub INS_HIRES 'F800
 	cpu.yres = 63
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
-	sfy = iif(aspect = 0, screeny/(cpu.yres+1), sfx) ' and Y
-	cpu.pc = &h2c0
+	sfy = screeny/(cpu.yres+1)' and Y
+	aspect = 0 ' not needed for hires
+	cpu.pc = &h02c0
 	If colorlines Then colorit
 End Sub
 Sub INS_CLS '00E0
@@ -346,7 +347,7 @@ Sub INS_READRPL 'FX85
 	next
 End Sub
 Sub INS_DISMEGAMODE
-		cpu.mode = "CHIP-8"
+	cpu.mode = "CHIP-8"
 	cpu.xres = 63
 	cpu.yres = 31
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
@@ -355,8 +356,9 @@ Sub INS_DISMEGAMODE
 	If colorlines Then colorit
 End Sub
 Sub INS_ENMEGAMODE
+	cpu.mode = "MEGA"
 	cpu.xres = 255
-	cpu.yres = 192
+	cpu.yres = 191
 	ReDim Preserve display(0 To cpu.xres, 0 To cpu.yres)
 	sfx = screenx/(cpu.xres+1) 'compute the scale factor for X
 	sfy = iif(aspect = 0, screeny/(cpu.yres+1), sfx) ' and Y
