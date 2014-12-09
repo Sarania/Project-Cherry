@@ -794,7 +794,7 @@ Do
 	If didlogo = 0 And cpu.opcount > 600 Then
 		didlogo = 1
 		initcpu
-		cls
+		Cls
 		loadprog
 	EndIf
 	If InKey = Chr(255) + "k" Then CAE
