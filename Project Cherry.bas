@@ -35,6 +35,7 @@ Type controller
 	Left As UByte
 	Right As ubyte
 End Type
+Dim Shared As String game
 Dim Shared didlogo As UByte = 0
 Dim Shared As controller c
 Dim Shared As chip8 CPU 'main cpu
@@ -141,7 +142,7 @@ End Sub
 
 Sub saveState
 	Dim As UByte f = FreeFile
-	Open ExePath & "/cherry.state" For Output As #f
+	Open ExePath & "/states/" & game & "_cherry.state" For Output As #f
 	Print #f, cpu.drawflag
 	Print #f, cpu.opcount
 	Print #f, cpu.instruction
@@ -171,7 +172,7 @@ Sub saveState
 	Next
 	Close #f
 	f = FreeFile
-	Open ExePath & "/cherry.ram" For Binary As #f
+	Open ExePath & "/states/" & game & "_cherry.ram" For Binary As #f
 	Put #f, 1, cpu.memory()
 	Close #f
 	start = Timer
@@ -181,7 +182,7 @@ End Sub
 Sub loadstate
 	initcpu
 	Dim As UByte f = FreeFile
-	Open ExePath & "/cherry.state" For Input As #f
+	Open ExePath & "/states/" & game & "_cherry.state" For input As #f
 	Input #f, cpu.drawflag
 	Input #f, cpu.opcount
 	Input #f, cpu.instruction
@@ -211,7 +212,7 @@ Sub loadstate
 	Next
 	Close #f
 	f = FreeFile
-	Open ExePath & "/cherry.ram" For Binary As #f
+	Open ExePath & "/states/" & game & "_cherry.ram" For Binary As #f
 	Get #f, 1, cpu.memory()
 	Close #f
 	start = Timer
@@ -226,7 +227,7 @@ Sub extract 'extract VX and VY from cpu.opcode
 End Sub
 
 Sub about 'Display about section when HOME key is pressed
-		Cls
+	Cls
 	Dim cherry As fb.image Ptr
 	Dim banner As fb.image Ptr
 	cherry = ImageCreate(128,148,RGB(0,0,0))
@@ -389,8 +390,8 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 
 	If MultiKey(SC_F5) Then 'load state
 		Beep
-		If Not FileExists(ExePath & "/cherry.state") Or Not FileExists(ExePath & "/cherry.ram") Then
-			Draw String(5,5), "No save state found!", RGB(255,0,0)
+		If Not FileExists(ExePath & "/states/" & game & "_cherry.state") Or Not FileExists(ExePath & "/states/" & game & "_cherry.ram") Then
+			Draw String ((screenx/2) - 80,screeny/2), "No save state found!", RGB(255,0,0)
 		Else
 			doload = 1
 			Draw String ((screenx/2) - 104,screeny/2), "State loaded successfully!", RGB(255,0,255)
@@ -513,6 +514,7 @@ Sub loadprog(ByVal pn As String = "") 'Load a ROM
 	If UCase(shpname) = "JUMPING X AND O [HARRY KLEINBERG, 1977].CH8" Then hack = 1
 	If UCase(shpname) = "MINES! - THE MINEHUNTER [DAVID WINTER, 1997].CH8" Then hack = 1
 	If UCase(shpname) = "ROCKET LAUNCH [JONAS LINDSTEDT].CH8" Then hack = 2
+	game = Left(shpname, Len(shpname)-4)
 
    
 
