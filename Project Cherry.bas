@@ -35,6 +35,8 @@ Type controller
 	Left As UByte
 	Right As ubyte
 End Type
+
+Dim Shared As UByte speedunlock = 0 ' for turbo mode
 Dim Shared As String game
 Dim Shared didlogo As UByte = 0
 Dim Shared As controller c
@@ -416,7 +418,16 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 		While MultiKey(SC_TILDE)
 			Sleep 15
 		Wend
-
+	EndIf
+	
+	If MultiKey(SC_TAB) Then 'Engage turbo
+		speedunlock = 1
+	EndIf
+	
+	If speedunlock = 1 And (Not MultiKey(SC_TAB)) Then 'Disengage turbo
+		speedunlock = 0
+		start = timer
+	cpu.opcount = 0
 	EndIf
 
 End Sub
@@ -565,8 +576,8 @@ framestart = timer
 Do
 	cpu.opcount+=1
 
-	While cpu.opcount / ops > Timer - start 'limit ops per sec
-		Sleep 15
+	While ((cpu.opcount / ops > Timer - start) And speedunlock = 0) Or (cpu.opcount / (10000) > Timer - start) 'limit ops per sec. 10kops with turbo on.
+		Sleep 1
 	Wend
 	cpu.opcodePTR = @cpu.memory(cpu.pc) 'Yep, this is weird. But I couldn't concatenate them the normal way
 	cpu.opcode = (LoByte(*cpu.opcodePTR) Shl 8 ) + HiByte(*cpu.opcodePTR) 'More of the weirdness mentioned above
