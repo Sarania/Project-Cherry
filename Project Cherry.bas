@@ -420,6 +420,8 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 
 End Sub
 Sub render
+	Dim As Single fps = frames / (Timer - framestart)
+	If fps > 60 Then Exit Sub
 	frames+=1
 	Dim As Double renderstart = Timer
 	Dim As UInteger offsety = 0
@@ -428,7 +430,6 @@ Sub render
 	screenbuff = ImageCreate(screenx,screeny,RGB(backR,backG,backB))
 	For y As UInteger =  0 To cpu.yres
 		If colorlines = 1 Then clr = dispcolor(y)
-		'If y = 0 Then clr = RGB(255,0,0) Else clr = RGB(255,255,255)
 		For x As UInteger = 0 To cpu.xres
 			If display(x,y) = 1 Then Line screenbuff, (x*sfx,(y*sfy)+offsety)-(x*sfx+sfx,(y*sfy+sfy)+offsety), clr, BF
 		Next
@@ -565,8 +566,6 @@ Do
 	While cpu.opcount / ops > Timer - start 'limit ops per sec
 		Sleep 15
 	Wend
-
-	If cpu.drawflag = 1 Then: render: cpu.drawflag = 0: End If
 	cpu.opcodePTR = @cpu.memory(cpu.pc) 'Yep, this is weird. But I couldn't concatenate them the normal way
 	cpu.opcode = (LoByte(*cpu.opcodePTR) Shl 8 ) + HiByte(*cpu.opcodePTR) 'More of the weirdness mentioned above
 	decode(cpu.opcode)
@@ -747,6 +746,8 @@ Do
 			Print cpu.opcount
 			Sleep
 	End Select
+	
+	render ' doing it this way with a framelimiter yeilds much lighter requirements than depending on the drawflag
 
 	If Timer-chipstart > 0.01667 Then ' 0.1667 is 1/60 of a second, these count down at 60hz
 		If cpu.delaytimer > 0 Then cpu.delaytimer-=1

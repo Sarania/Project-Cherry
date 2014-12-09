@@ -218,6 +218,7 @@ Sub INS_KEYWAIT 'FX0A
 				Exit Do
 			EndIf
 		Next
+		 render 
 	Loop
 End Sub
 
