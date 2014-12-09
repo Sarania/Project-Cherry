@@ -37,6 +37,7 @@ Type controller
 End Type
 
 Dim Shared As UByte speedunlock = 0 ' for turbo mode
+Dim Shared As UByte speedtoggle = 0 ' for turbo mode toggle
 Dim Shared As String game
 Dim Shared didlogo As UByte = 0
 Dim Shared As controller c
@@ -419,15 +420,28 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 			Sleep 15
 		Wend
 	EndIf
-	
-	If MultiKey(SC_TAB) Then 'Engage turbo
+
+	If MultiKey(SC_TAB) Then 'Engage turbo (while tab is held)
 		speedunlock = 1
 	EndIf
-	
+
 	If speedunlock = 1 And (Not MultiKey(SC_TAB)) Then 'Disengage turbo
 		speedunlock = 0
 		start = timer
-	cpu.opcount = 0
+		cpu.opcount = 0
+	EndIf
+
+	If MultiKey(SC_F4) Then 'Toggle turbo
+		If speedtoggle = 0 Then
+			speedtoggle = 1
+		Else
+			speedtoggle = 0
+			start = Timer
+			cpu.opcount = 0
+		EndIf
+	While MultiKey(SC_F4)
+		Sleep 1
+	Wend
 	EndIf
 
 End Sub
@@ -516,7 +530,7 @@ Sub loadprog(ByVal pn As String = "") 'Load a ROM
 	If UCase(Left(shpname,4)) = "PONG" Then layout = 4
 	If UCase(Left(shpname,14)) = "SPACE INVADERS" Then layout = 5
 	If UCase(Left(shpname,3)) = "ANT" Then layout = 6
-	
+
 	'Games that need wrapping off:
 	If UCase(shpname) = "BOWLING [GOOITZEN VAN DER WAL].CH8" Then hack = 1
 	If UCase(shpname) = "BLITZ [DAVID WINTER].CH8" Then hack = 1
@@ -527,7 +541,7 @@ Sub loadprog(ByVal pn As String = "") 'Load a ROM
 	If UCase(shpname) = "ROCKET LAUNCH [JONAS LINDSTEDT].CH8" Then hack = 2
 	game = Left(shpname, Len(shpname)-4)
 
-   
+
 
 	If pn <> CurDir & ("/res/logo.bin") Then WindowTitle "Project Cherry: " & shpname Else WindowTitle "Project Cherry"' set window title
 	Dim As Integer f = FreeFile
@@ -576,7 +590,7 @@ framestart = timer
 Do
 	cpu.opcount+=1
 
-	While ((cpu.opcount / ops > Timer - start) And speedunlock = 0) Or (cpu.opcount / (10000) > Timer - start) 'limit ops per sec. 10kops with turbo on.
+	While ((cpu.opcount / ops > Timer - start) And speedunlock = 0 And speedtoggle = 0) Or (cpu.opcount / (10000) > Timer - start) 'limit ops per sec. 10kops with turbo on.
 		Sleep 1
 	Wend
 	cpu.opcodePTR = @cpu.memory(cpu.pc) 'Yep, this is weird. But I couldn't concatenate them the normal way
@@ -761,7 +775,7 @@ Do
 			print "File address: " & hex(cpu.pc - &h200)
 			Sleep
 	End Select
-	
+
 	render ' doing it this way with a framelimiter yeilds much lighter requirements than depending on the drawflag
 
 	If Timer-chipstart > 0.01667 Then ' 0.1667 is 1/60 of a second, these count down at 60hz
@@ -794,7 +808,7 @@ Do
 		Draw String debugbox, (2, 62), "Op/s: " & cpu.opcount / (Timer - start)
 		Draw String debugbox, (2, 72), "Emulator mode: " & cpu.mode
 		Draw String debugbox, (2, 82), "FPS: " & frames / (Timer - framestart)
-		Draw String debugbox, (2, 92), "Frame time: " & Format(frametime, "0.00000") & " | " & Format(1/frametime, "0.0000") 
+		Draw String debugbox, (2, 92), "Frame time: " & Format(frametime, "0.00000") & " | " & Format(1/frametime, "0.0000")
 		put (0,0),debugBox, pset
 		ImageDestroy(debugbox)
 	End If
