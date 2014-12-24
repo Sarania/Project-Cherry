@@ -4,6 +4,13 @@ Declare Sub decode(ByVal opc As UShort)
 
 Sub decode(ByVal opc As UShort) ' I realize this is a mess, with EXIT SUB everywhere and what not, but this was the most readable way to do this
 	Dim As String opctemp = UCase(Hex(opc))	
+		If Left(opctemp,1) = "1" Then
+		jumpcount+=1
+		cpu.instruction = "JMP"
+		Exit Sub
+		Else
+			jumpcount = 0
+	End If
 		
 If LEFT(opctemp, 1) = "C" And Len(opctemp) < 4 Then
 		cpu.instruction = "SCROLLN"
@@ -27,11 +34,6 @@ EndIf
 		Exit Sub
 	End If
 	
-
-	If Left(opctemp,1) = "1" Then
-		cpu.instruction = "JMP"
-		Exit Sub
-	End If
 
 	If Left(opctemp,1) = "2" Then
 		cpu.instruction = "CALL"

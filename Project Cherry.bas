@@ -51,6 +51,7 @@ Dim Shared As UInteger VX, VY, KK 'Chip 8 vars
 Dim Shared As UInteger screenx, screeny, ops 'screen size, and ops per second
 Dim Shared As UInteger foreR, foreG, foreB, backR, backG, backB 'screen colors
 Dim Shared As UInteger sfx, sfy 'scale factor for display
+Dim Shared As UInteger jumpcount ' counts consecutive jumps
 Dim Shared As Single version = 1.00 'version
 Dim Shared As ULongInt frames
 Dim Shared As Double frametime, framestart
@@ -556,9 +557,13 @@ End Sub
 
 
 Sub CAE 'Cleanup and Exit
+	While InKey <> "": wend
 	FSOUND_Close
 	Cls
 	Close
+	Draw String ((screenx/2) - 64,screeny/2), "Emulation ended.", RGB(255,0,255)
+	Draw String ((screenx/2) - 88,(screeny/2) + 10), "Press any key to exit.", RGB(255,0,255)
+	Sleep
 	End
 End Sub
 
@@ -583,7 +588,7 @@ ChDir ".."
 Cls
 start = Timer
 chipstart = Timer
-framestart = timer
+framestart = Timer
 
 
 'main loop
@@ -610,6 +615,7 @@ Do
 			INS_RET
 
 		Case "JMP"
+			If jumpcount > (ops*3) Then CAE
 			INS_JMP
 
 		Case "CALL"

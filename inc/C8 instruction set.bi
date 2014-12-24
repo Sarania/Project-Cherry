@@ -212,6 +212,7 @@ End Sub
 
 Sub INS_KEYWAIT 'FX0A
 	Do
+		Sleep 250,1
 		keycheck
 		For i As Integer = 0 To 15
 			If cpu.key(i) <> 0 Then
