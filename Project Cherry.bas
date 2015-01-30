@@ -52,6 +52,8 @@ Dim Shared As UInteger screenx, screeny, ops 'screen size, and ops per second
 Dim Shared As UInteger foreR, foreG, foreB, backR, backG, backB 'screen colors
 Dim Shared As UInteger sfx, sfy 'scale factor for display
 Dim Shared As UInteger jumpcount ' counts consecutive jumps
+Dim Shared As UInteger msgcount = 0 ' message display time counter
+dim shared as string msg ' message passing
 Dim Shared As Single version = 1.00 'version
 Dim Shared As ULongInt frames
 Dim Shared As Double frametime, framestart
@@ -383,24 +385,26 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 	EndIf
 
 	If MultiKey(SC_F3) Then 'savestate
-		Beep
+		cpu.soundTimer = 30
+		msgcount = 2000
+		msg = "State saved sucessfully!"
 		dosave = 1
-		Draw String ((screenx/2) - 100,screeny/2), "State saved successfully!", RGB(255,0,255)
-		Sleep 1000,1
 		While MultiKey(SC_F3)
 			Sleep 15
 		Wend
 	EndIf
 
 	If MultiKey(SC_F5) Then 'load state
-		Beep
 		If Not FileExists(ExePath & "/states/" & game & "_cherry.state") Or Not FileExists(ExePath & "/states/" & game & "_cherry.ram") Then
-			Draw String ((screenx/2) - 80,screeny/2), "No save state found!", RGB(255,0,0)
+			cpu.soundTimer = 30
+			msgcount = 2000
+			msg = "No save state found!"
 		Else
+			cpu.soundTimer = 30
 			doload = 1
-			Draw String ((screenx/2) - 104,screeny/2), "State loaded successfully!", RGB(255,0,255)
+			msgcount = 2000
+			msg = "State loaded sucessfully!"
 		EndIf
-		Sleep 1000,1
 		While MultiKey(SC_F5)
 			Sleep 15
 		Wend
@@ -440,9 +444,9 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 			start = Timer
 			cpu.opcount = 0
 		EndIf
-	While MultiKey(SC_F4)
-		Sleep 1
-	Wend
+		While MultiKey(SC_F4)
+			Sleep 1
+		Wend
 	EndIf
 
 End Sub
@@ -822,6 +826,11 @@ Do
 
 	If dosave = 1 Then saveState: dosave = 0: cpu.drawflag = 1: End if
 	If doload = 1 Then loadstate: doload = 0: cpu.drawflag = 1: End If
+	If msgcount > 0 Then
+		Draw String ((screenx/2) - (Len(msg)*4), screeny/2), msg, RGB(200,0,255)
+		msgcount -= 1
+		if msgcount = 0 then msg = ""
+	EndIf
 	If didlogo = 0 And cpu.opcount > 600 Then
 		didlogo = 1
 		initcpu
