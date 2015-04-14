@@ -164,7 +164,7 @@ Sub INS_DISPLAY 'DXYN
 	n = cpu.opcode And &h000F
 	cpu.v(&hf) = 0
 	If n = 0 Then n = 16
-	If n < 16 Or cpu.mode = "CHIP-8" Then ' normal sprite
+	If n < 16 Or cpu.mode = "CHIP-8" Then 'normal sprite
 		For y As Integer = 0 To n-1
 			p = cpu.memory(cpu.index+y)
 			For x As Integer = 0 To 7
