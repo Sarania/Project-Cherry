@@ -64,7 +64,6 @@ Type Chip8
 	hp48(0 To 7) As UByte 'SCHIP registers
 	xres As UByte = 63 'display X
 	yres As UByte = 31'display y
-	didrewind As UByte = 0
 End Type
 
 Type controller
@@ -74,13 +73,14 @@ Type controller
 	Right As ubyte
 End Type
 
+Dim Shared As UInteger maxrewind = 0
+Dim Shared As UByte rewinding = 0
 Dim Shared As UByte speedunlock = 0 ' for turbo mode
 Dim Shared As UByte speedtoggle = 0 ' for turbo mode toggle
 Dim Shared As String game
 Dim Shared didlogo As UByte = 0
 Dim Shared As controller c
 Dim Shared As chip8 CPU 'main cpu
-cpu.didrewind = 1
 Dim Shared As chip8 CPUrewind(1 To 300) ' rewind states
 Dim Shared display(0 To cpu.xres, 0 To cpu.yres) As UByte 'Monochrome display
 Dim Shared displayRewind(0 To cpu.xres, 0 To cpu.yres, 1 To 300) As ubyte ' display UByte
@@ -438,7 +438,8 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 	EndIf
 	
 	While MultiKey(SC_F9) 'rewind test
-		If cpurewind(rewindpoint).didrewind <>1 Or rewindpoint > 299 Then: Beep: Exit While: End if
+		rewinding = 1
+		If rewindpoint <= maxrewind-1 Then
 		cpu = cpurewind(rewindpoint)
 		For y As Integer = 0 To cpu.yres
 			For x As Integer = 0 To cpu.xres
@@ -448,7 +449,9 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 		render
 		Sleep 100,1
 		rewindpoint+=1
+		End if
 	Wend
+	rewinding = 0
 
 	If MultiKey(SC_F5) Then 'load state
 		If Not FileExists(ExePath & "/states/" & game & "_cherry.state") Or Not FileExists(ExePath & "/states/" & game & "_cherry.ram") Then
@@ -521,6 +524,11 @@ Sub render
 			If display(x,y) = 1 Then Line screenbuff, (x*sfx,(y*sfy)+offsety)-(x*sfx+sfx,(y*sfy+sfy)+offsety), clr, BF
 		Next
 	Next
+	If rewinding = 1 And (frames Mod 3 = 0 Or frames Mod 6 = 0) Then
+	Dim As fb.image Ptr rewind = ImageCreate(32,18, RGB(0,0,0))
+	BLoad ("res/rewind.bmp",rewind)
+	put screenbuff, (1,1), rewind, pset
+	end if
 	Put (0,0),screenbuff,PSet
 	ImageDestroy(screenbuff)
 	frametime = Timer-renderstart
@@ -896,7 +904,9 @@ Do
 		loadprog
 	EndIf
 	'this is for rewinding
-	If Timer - RewindTimer > .1 Then
+	If Timer - RewindTimer > .1 And didlogo = 1 Then
+		If maxrewind < 300 Then maxrewind + = 1
+		
 		ReDim Preserve displayRewind(0 To cpu.xres, 0 To cpu.yres, 1 To 300) As UByte
 		RewindTimer = Timer
 		For i As Integer = 300 To 2 Step -1
