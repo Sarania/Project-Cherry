@@ -43,7 +43,6 @@ Using FB 'FB namespace
 #Include Once "file.bi" ' file manipulation
 #Include Once "string.bi" ' string manipulation
 #Include Once "fmod.bi" ' a whole audio library just for boop sounds!
-
 Dim Shared As UByte debug = 0' 1 to show debug, 0 to not show
 
 Type Chip8
@@ -65,6 +64,7 @@ Type Chip8
 	hp48(0 To 7) As UByte 'SCHIP registers
 	xres As UByte = 63 'display X
 	yres As UByte = 31'display y
+	didrewind As UByte = 0
 End Type
 
 Type controller
@@ -80,11 +80,15 @@ Dim Shared As String game
 Dim Shared didlogo As UByte = 0
 Dim Shared As controller c
 Dim Shared As chip8 CPU 'main cpu
+cpu.didrewind = 1
+Dim Shared As chip8 CPUrewind(1 To 300) ' rewind states
 Dim Shared display(0 To cpu.xres, 0 To cpu.yres) As UByte 'Monochrome display
+Dim Shared displayRewind(0 To cpu.xres, 0 To cpu.yres, 1 To 300) As ubyte ' display UByte
 Dim Shared dispcolor(1 To cpu.yres+1) As integer
 Dim Shared As fb.image Ptr screenbuff 'buffer for screen
 Dim Shared As fb.image Ptr debugbox 'debug box
 Dim Shared As Double start, chipstart 'start is used for opcode timing, chipstart for chip8 timers
+Dim Shared As Double rewindTimer = 0
 Dim Shared As UInteger VX, VY, KK 'Chip 8 vars
 Dim Shared As UInteger screenx, screeny, ops 'screen size, and ops per second
 Dim Shared As UInteger foreR, foreG, foreB, backR, backG, backB 'screen colors
@@ -341,6 +345,7 @@ End Sub
 
 
 Sub keycheck 'Check for keypresses, and pass to the emulated CPU
+	Dim As UInteger rewindpoint = 1
 	For i As Integer = 0 To 15
 		cpu.key(i) = 0
 	Next
@@ -431,6 +436,19 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 			Sleep 15
 		Wend
 	EndIf
+	
+	While MultiKey(SC_F9) 'rewind test
+		If cpurewind(rewindpoint).didrewind <>1 Or rewindpoint > 299 Then: Beep: Exit While: End if
+		cpu = cpurewind(rewindpoint)
+		For y As Integer = 0 To cpu.yres
+			For x As Integer = 0 To cpu.xres
+				display(x,y) = displayRewind(x,y,rewindpoint)
+			Next
+		Next
+		render
+		Sleep 100,1
+		rewindpoint+=1
+	Wend
 
 	If MultiKey(SC_F5) Then 'load state
 		If Not FileExists(ExePath & "/states/" & game & "_cherry.state") Or Not FileExists(ExePath & "/states/" & game & "_cherry.ram") Then
@@ -528,7 +546,9 @@ Sub initcpu 'initialize the CPU to power on state
 	Next
 	CPU.delaytimer = 0
 	CPU.soundtimer = 0
-
+	For i As Integer = 1 To 300
+		CPUrewind(i) = CPU
+	Next
 	'Copy the font into memory
 	For i As Integer = 0 To 79
 		cpu.memory(i) = font(i)
@@ -875,5 +895,24 @@ Do
 		Cls
 		loadprog
 	EndIf
+	'this is for rewinding
+	If Timer - RewindTimer > .1 Then
+		ReDim Preserve displayRewind(0 To cpu.xres, 0 To cpu.yres, 1 To 300) As UByte
+		RewindTimer = Timer
+		For i As Integer = 300 To 2 Step -1
+			cpuRewind(i) = cpuRewind(i-1)
+			For y As Integer = 0 To cpu.yres
+				For x As Integer = 0 To cpu.xres
+					displayrewind(x,y,i) = displayRewind(x,y,i-1)
+				Next
+			Next
+		Next
+		cpuRewind(1) = CPU
+		For y As Integer = 0 To cpu.yres
+			For x As Integer = 0 To cpu.xres
+				displayrewind(x,y,1) = display(x,y)
+			Next
+		Next
+	End if
 	If InKey = Chr(255) + "k" Then CAE
 Loop
