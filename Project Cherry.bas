@@ -73,6 +73,7 @@ Type controller
 	Right As ubyte
 End Type
 
+Dim Shared As UByte record = 1
 Dim Shared As UInteger maxrewind = 0
 Dim Shared As UByte rewinding = 0
 Dim Shared As UByte speedunlock = 0 ' for turbo mode
@@ -322,6 +323,7 @@ Sub loadini
 		Print #f, 0 '1 for random color lines
 		Print #f, 1' 1 for aspect correct scaling
 		Print #f, 0 'mute on
+		Print #f, 0 'record on
 		Close #f
 	EndIf
 	Open ExePath & "\cherry.ini" For Input As #f
@@ -337,6 +339,7 @@ Sub loadini
 	Input #f, Colorlines
 	input #f, aspect
 	Input #f, mute
+	Input #f, record
 	Close #f
 	If screenx < 640 Then screenx = 640
 	If screeny < 480 Then screeny = 480
@@ -437,7 +440,8 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 		Wend
 	EndIf
 	
-	While MultiKey(SC_F9) 'rewind test
+	While MultiKey(SC_F9) 'rewind 
+		If record = 0 Then Exit while
 		rewinding = 1
 		If rewindpoint <= maxrewind-1 Then
 		cpu = cpurewind(rewindpoint)
@@ -452,6 +456,12 @@ Sub keycheck 'Check for keypresses, and pass to the emulated CPU
 		End if
 	Wend
 	rewinding = 0
+	
+	If MultiKey(SC_F10) Then 'record toggle
+		If record = 0 Then record = 1 Else record = 0
+	EndIf
+	While MultiKey(SC_F10): Sleep 15,1: wend
+
 
 	If MultiKey(SC_F5) Then 'load state
 		If Not FileExists(ExePath & "/states/" & game & "_cherry.state") Or Not FileExists(ExePath & "/states/" & game & "_cherry.ram") Then
@@ -528,7 +538,13 @@ Sub render
 	Dim As fb.image Ptr rewind = ImageCreate(32,18, RGB(0,0,0))
 	BLoad ("res/rewind.bmp",rewind)
 	put screenbuff, (1,1), rewind, pset
-	end if
+	end If
+	
+	If record = 1 And rewinding = 0 Then
+		Dim As fb.image Ptr record = ImageCreate(32,18, RGB(0,0,0))
+		BLoad("res/record.bmp", record)
+		Put screenbuff, (1,1), record, PSet
+	EndIf
 	Put (0,0),screenbuff,PSet
 	ImageDestroy(screenbuff)
 	frametime = Timer-renderstart
@@ -904,7 +920,7 @@ Do
 		loadprog
 	EndIf
 	'this is for rewinding
-	If Timer - RewindTimer > .1 And didlogo = 1 Then
+	If Timer - RewindTimer > .1 And didlogo = 1 And record = 1 Then
 		If maxrewind < 300 Then maxrewind + = 1
 		
 		ReDim Preserve displayRewind(0 To cpu.xres, 0 To cpu.yres, 1 To 300) As UByte
