@@ -97,7 +97,7 @@ Dim Shared As UInteger sfx, sfy 'scale factor for display
 Dim Shared As UInteger jumpcount ' counts consecutive jumps
 Dim Shared As UInteger msgcount = 0 ' message display time counter
 dim shared as string msg ' message passing
-Dim Shared As Single version = 1.00 'version
+Dim Shared As Single version = 1.10 'version
 Dim Shared As ULongInt frames
 Dim Shared As Double frametime, framestart
 Dim Shared As UByte dosave, doload
