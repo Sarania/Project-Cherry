@@ -43,6 +43,7 @@ Using FB 'FB namespace
 #Include Once "file.bi" ' file manipulation
 #Include Once "string.bi" ' string manipulation
 #Include Once "fmod.bi" ' a whole audio library just for boop sounds!
+#Include Once "inc/crc32.bi"
 Dim Shared As UByte debug = 0' 1 to show debug, 0 to not show
 
 Type Chip8
@@ -583,7 +584,8 @@ Sub initcpu 'initialize the CPU to power on state
 End Sub
 
 Sub loadprog(ByVal pn As String = "") 'Load a ROM
-	Dim As String progname, shpname, onechr
+	Dim As String progname, shpname, onechr, crcgen, hcrc
+	Dim As UInteger crc
 	If pn <> "" Then progname = pn: GoTo gotname
 	If Command(1) <> "" Then'See if we got a filename from the command line/drag and drop/double click
 		progname = Command(1)
@@ -610,22 +612,7 @@ Sub loadprog(ByVal pn As String = "") 'Load a ROM
 		EndIf
 		shpname = shpname & onechr
 	Next
-	If UCase(Left(shpname,6)) = "BLINKY" Then layout = 1
-	If UCase(Left(shpname,6)) = "TETRIS" Then layout = 2
-	If UCase(Left(shpname,8)) = "BREAKOUT" Then layout = 3
-	If UCase(Left(shpname,5)) = "BRICK" Then layout = 3
-	If UCase(Left(shpname,4)) = "PONG" Then layout = 4
-	If UCase(Left(shpname,14)) = "SPACE INVADERS" Then layout = 5
-	If UCase(Left(shpname,3)) = "ANT" Then layout = 6
-
-	'Games that need wrapping off:
-	If UCase(shpname) = "BOWLING [GOOITZEN VAN DER WAL].CH8" Then hack = 1
-	If UCase(shpname) = "BLITZ [DAVID WINTER].CH8" Then hack = 1
-	If UCase(shpname) = "SQUASH [DAVID WINTER].CH8" Then hack = 1
-	If UCase(shpname) = "WALL [DAVID WINTER].CH8" Then hack = 1
-	If UCase(shpname) = "JUMPING X AND O [HARRY KLEINBERG, 1977].CH8" Then hack = 1
-	If UCase(shpname) = "MINES! - THE MINEHUNTER [DAVID WINTER, 1997].CH8" Then hack = 1
-	If UCase(shpname) = "ROCKET LAUNCH [JONAS LINDSTEDT].CH8" Then hack = 2
+	
 	game = Left(shpname, Len(shpname)-4)
 
 
@@ -637,8 +624,30 @@ Sub loadprog(ByVal pn As String = "") 'Load a ROM
 	If Lof(f) > 4095-512 Then maxlen = 4095-512 Else maxlen = Lof(f)
 	For i As Integer = 0 To maxlen
 		Get #f, i+1, cpu.memory(i+512), 1 ' file is 1 indexed, array is 0 indexed
+			crcgen = crcgen & Str(cpu.memory(i+512)) 
 	Next
 	Close #f
+	crc = 0
+	If pn <> CurDir & ("/res/logo.bin") Then 
+     crc = crc32(crc, crcgen, Len(crcgen))
+	End If
+	hcrc = Hex(crc)
+	If hcrc = "13C1BE05" Or hcrc = "93E9C8A" Then layout = 1
+	If hcrc = "4E90ABFF" Then layout = 2
+	If hcrc = "8DD7E376" Then layout = 3
+	If hcrc = "8DDD4717" Then layout = 3
+	If hcrc = "7B955E7D" Then layout = 4
+	If hcrc = "9BCB285E" Then layout = 5
+	If hcrc = "38552352" Then layout = 6
+
+	'Games that need wrapping off:
+	If hcrc = "B840A433" Then hack = 1
+	If hcrc = "5224DEF8" Then hack = 1
+	If hcrc = "617EC665" Then hack = 1
+	If hcrc = "884AFD91" Then hack = 1
+	If hcrc = "1944BA37" Then hack = 1
+	If hcrc = "74AC5185" Then hack = 1
+	If hcrc = "2878E5F7" Then hack = 2
 End Sub
 
 
